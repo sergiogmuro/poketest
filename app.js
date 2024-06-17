@@ -1,3 +1,14 @@
+function showLoading() {
+    document.getElementById('loading').style.display = 'flex';
+}
+
+// Ocultar el loading
+function hideLoading() {
+    document.getElementById('loading').style.display = 'none';
+}
+
+let titleName = null;
+
 document.addEventListener('DOMContentLoaded', function () {
     const content = document.getElementById('content');
     const baseURL = 'https://pokemon-project.com/episodios/latino';
@@ -9,12 +20,37 @@ document.addEventListener('DOMContentLoaded', function () {
         return parser.parseFromString(text, 'text/html');
     }
 
+    function setName(name) {
+        titleName = name;
+    }
+
     function updateURL(hash) {
         window.location.hash = hash;
     }
 
     function getCurrentTime() {
         return new Date().getTime();
+    }
+
+
+    function handleItemClick(e) {
+        if (!Element.prototype.closest) {
+            console.error('El navegador no es compatible con el método closest.');
+            return;
+        }
+
+        const clickedElement = e.target;
+        const container = clickedElement.closest('div'); // Buscar el contenedor más cercano que sea un <div>
+
+        const elements = container.querySelectorAll('a, button');
+
+        elements.forEach(element => {
+            if (element === clickedElement) {
+                element.classList.add('selected');
+            } else {
+                element.classList.remove('selected');
+            }
+        });
     }
 
     function isCacheValid(cacheKey) {
@@ -29,6 +65,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function loadData(cacheKey, url, displayFunction, containerClass, title, styles) {
+        showLoading();
+
         content.querySelector('#lists').style.display = 'flex';
         const containerDiv = content.querySelector(`${containerClass}`);
         containerDiv.innerHTML = '';
@@ -64,7 +102,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function displayData(dataMap, containerDiv, title, styles) {
-        content.querySelector(`#title`).innerText = title;
+        hideLoading();
+
+        content.querySelector(`#title`).innerText = title + ' - ' + titleName;
         // content.innerHTML = `<h1>${title}</h1><div class="${containerClass} ${styles}"></div>`;
 
         let index = 0;
@@ -72,13 +112,19 @@ document.addEventListener('DOMContentLoaded', function () {
             index = index + 1;
             const a = document.createElement('a');
             const itemNamesTrimmed = itemNames.map(name => name.trim());
-            const itemName = itemNamesTrimmed.join(' ');
-            a.innerText = `${index}. ${itemName}`;
+
+            let itemName = itemNamesTrimmed.join(' ');
+            itemName = `${index}. ${itemName}`;
+
+            a.innerText = itemName;
             a.href = '#';
             a.addEventListener('click', (e) => {
                 e.preventDefault();
+                setName(itemName)
                 updateURL(itemLink);
+                handleItemClick(a)
             });
+
             containerDiv.appendChild(a);
         }
     }
@@ -119,6 +165,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function playEpisodeVideo(episodeURL) {
+        content.querySelector(`#title`).innerText = titleName;
+
         console.log('PLAYING EPISODE');
         const seasonAndEpisode = extractSeasonAndEpisode(episodeURL);
         if (seasonAndEpisode) {

@@ -71,6 +71,24 @@
             background-color: #0056b3;
         }
 
+        #sessions-list a,
+        #sessions-list button{
+            background-color: transparent;
+            border: 1px solid #007bff;
+            color: #007bff;
+        }
+        #sessions-list a:hover,
+        #sessions-list button:hover {
+            background-color: #ccc;
+            border: 1px solid #007bff;
+            color: #007bff;
+        }
+
+        .selected {
+            background-color: #ccc;
+            color: #000;
+        }
+
         .content-section {
             margin-top: 20px;
         }
@@ -119,10 +137,59 @@
             width: 100%;
         }
 
+        #loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8); /* Fondo semitransparente */
+            z-index: 9999; /* Para que esté encima de todo */
+        }
+
+        .loading-dots {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .loading-dots div {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #333;
+            margin: 0 5px;
+            animation: loading-animation 1s infinite ease-in-out;
+        }
+
+        @keyframes loading-animation {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.5);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+
     </style>
 </head>
 <body>
 <div id="content">
+    <div id="loading" style="display: none;">
+        <p>Loading...</p>
+        <div class="loading-dots">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
     <h1 id="title">Temporadas</h1>
     <div id="video"></div>
     <div id="lists">
