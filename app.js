@@ -76,7 +76,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateURL(itemLink);
             });
             containerDiv.appendChild(a);
-            containerDiv.appendChild(document.createElement('br'));
         }
     }
 
