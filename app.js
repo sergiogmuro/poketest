@@ -13,73 +13,70 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.hash = hash;
     }
 
-    async function loadSeries() {
-        console.log('LOADING SERIES')
-        const url = `${baseURL}/serie-ash`;
-        const doc = await fetchHTML(url);
-        const seriesElements = doc.querySelectorAll('.real-table tbody tr a');
-
-        content.innerHTML = '<h1>Series de Pokémon</h1><div class="series"></div>';
-        const seriesDiv = content.querySelector('.series');
-
-        const seriesMap = {};
-        seriesElements.forEach(series => {
-            const seriesName = series.innerText;
-            const seriesLink = series.href;
-
-            if (seriesMap[seriesLink]) {
-                seriesMap[seriesLink].push(seriesName);
-            } else {
-                seriesMap[seriesLink] = [seriesName];
-            }
-        });
-
-        for (const [seriesLink, seriesNames] of Object.entries(seriesMap)) {
-            const a = document.createElement('a');
-            const serieName = seriesNames.join(' - ');
-            a.innerText = serieName;
-            a.href = '?temp=' + seriesLink + '&name=' + serieName;
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                // loadEpisodes(seriesLink);
-                updateURL(seriesLink);
-            });
-            seriesDiv.appendChild(a);
-            seriesDiv.appendChild(document.createElement('br'));
-        }
+    function getCurrentTime() {
+        return new Date().getTime();
     }
 
-    async function loadEpisodes(seriesURL) {
-        console.log('LOADING EPISODES')
-        const doc = await fetchHTML(seriesURL);
-        const episodeElements = doc.querySelectorAll('.real-table tbody tr a');  // Ajusta el selector según la estructura del HTML de la página
+    function isCacheValid(cacheKey) {
+        const lastUpdateTime = localStorage.getItem(`${cacheKey}_cacheUpdateTime`);
+        if (lastUpdateTime) {
+            const currentTime = getCurrentTime();
+            const timeElapsed = currentTime - parseInt(lastUpdateTime);
+            const oneHourInMillis = 60 * 60 * 1000; // 1 hora en milisegundos
+            return timeElapsed < oneHourInMillis;
+        }
+        return false;
+    }
 
-        content.innerHTML = '<h1>Episodios</h1><div class="episodes"></div>';
-        const episodesDiv = content.querySelector('.episodes');
+    async function loadData(cacheKey, url, displayFunction, title) {
+        console.log(`LOADING ${cacheKey?.toUpperCase()}`);
+        if (isCacheValid(cacheKey)) {
+            const cachedData = JSON.parse(localStorage.getItem(`cached_${cacheKey}_${url}`));
+            if (cachedData) {
+                displayFunction(cachedData, title, title);
+                return;
+            }
+        }
 
-        const episodeMap = {};
-        episodeElements.forEach(episode => {
-            const episodeName = episode.innerText;
-            const episodeLink = episode.href;
+        const doc = await fetchHTML(url);
+        const elements = doc.querySelectorAll('.real-table tbody tr a');
 
-            if (episodeMap[episodeLink]) {
-                episodeMap[episodeLink].push(episodeName);
+        const dataMap = {};
+        elements.forEach(item => {
+            const itemName = item.innerText;
+            const itemLink = item.href;
+
+            if (dataMap[itemLink]) {
+                dataMap[itemLink].push(itemName);
             } else {
-                episodeMap[episodeLink] = [episodeName];
+                dataMap[itemLink] = [itemName];
             }
         });
 
-        for (const [episodesLink, episodesNames] of Object.entries(episodeMap)) {
+        localStorage.setItem(`${cacheKey}_cacheUpdateTime`, getCurrentTime());
+        localStorage.setItem(`cached_${cacheKey}_${url}`, JSON.stringify(dataMap));
+
+        displayFunction(dataMap);
+    }
+
+    function displayData(dataMap, containerClass, title) {
+        content.innerHTML = `<h1>${title}</h1><div class="${containerClass}"></div>`;
+        const containerDiv = content.querySelector(`.${containerClass}`);
+
+        let index = 0;
+        for (const [itemLink, itemNames] of Object.entries(dataMap)) {
+            index = index + 1;
             const a = document.createElement('a');
-            const episodeName = episodesNames.join(' - ');
-            a.innerText = episodeName;
-            a.href = '?temp=' + episodesLink + '&name=' + episodeName;
+            const itemNamesTrimmed = itemNames.map(name => name.trim());
+            const itemName = itemNamesTrimmed.join(' ');
+            a.innerText = `${index}. ${itemName}`;
+            a.href = '#';
             a.addEventListener('click', (e) => {
                 e.preventDefault();
-                updateURL(episodesLink);
+                updateURL(itemLink);
             });
-            episodesDiv.appendChild(a);
-            episodesDiv.appendChild(document.createElement('br'));
+            containerDiv.appendChild(a);
+            containerDiv.appendChild(document.createElement('br'));
         }
     }
 
@@ -113,12 +110,13 @@ document.addEventListener('DOMContentLoaded', function () {
         videoContainer.appendChild(videoElement);
 
         videoElement.src = url;
+        videoElement.requestFullscreen()
         videoElement.load();
         videoElement.play();
     }
 
     function playEpisodeVideo(episodeURL) {
-        console.log('PLAYING EPISODE')
+        console.log('PLAYING EPISODE');
         const seasonAndEpisode = extractSeasonAndEpisode(episodeURL);
         if (seasonAndEpisode) {
             const videoUrl = buildVideoUrl(seasonAndEpisode.season, seasonAndEpisode.episode);
@@ -129,18 +127,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-
-    // Handle URL hash changes
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash.substring(1);
         if (hash) {
             if (hash.includes('temporada-') && hash.includes('episodio-')) {
                 playEpisodeVideo(hash);
             } else {
-                loadEpisodes(hash);
+                loadData('episodes', hash, displayData, 'EPISODIOS');
             }
         } else {
-            loadSeries();
+            loadData('series', `${baseURL}/serie-ash`, displayData, 'TEMPORADAS');
         }
     });
 
@@ -149,9 +145,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.location.hash.includes('temporada-') && window.location.hash.includes('episodio-')) {
             playEpisodeVideo(window.location.hash.substring(1));
         } else {
-            loadEpisodes(window.location.hash.substring(1));
+            loadData('episodes', window.location.hash.substring(1), displayData, 'EPISODIOS');
         }
     } else {
-        loadSeries();
+        loadData('series', `${baseURL}/serie-ash`, displayData, 'TEMPORADAS');
     }
 });
