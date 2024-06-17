@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.preventDefault();
                 setName(itemName)
                 updateURL(itemLink);
-                handleItemClick(a)
+                // handleItemClick(a)
             });
 
             containerDiv.appendChild(a);
