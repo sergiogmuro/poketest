@@ -5,29 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Series de Pokémon</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-
-        a {
-            text-decoration: none;
-            color: blue;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .series, .episodes {
-            margin-bottom: 20px;
-        }
         /* Estilos generales */
 
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            font-size: 16px; /* Ajuste del tamaño de fuente */
         }
 
         .container {
@@ -58,7 +42,7 @@
         .navbar ul li a {
             color: #fff;
             text-decoration: none;
-            padding: 5px 10px;
+            padding: 10px 20px; /* Aumento del espacio para facilitar la interacción */
             border-radius: 5px;
             transition: background-color 0.3s ease;
         }
@@ -78,8 +62,8 @@
         a,
         button {
             display: inline-block;
-            padding: 10px 20px;
-            margin: 5px;
+            padding: 15px 30px; /* Aumento del espacio para facilitar la interacción */
+            margin: 10px;
             background-color: #007bff;
             color: #fff;
             text-decoration: none;
@@ -119,18 +103,19 @@
 
         /* Media queries para diseño responsivo */
 
-        @media (max-width: 768px) {
+        @media (max-width: 1500px) {
             .container {
-                padding: 10px;
+                max-width: 1000px; /* Reducción del ancho máximo para ajustarse a pantallas más pequeñas */
+            }
+        }
+
+        @media (max-width: 1300px) {
+            .container {
+                max-width: 800px; /* Reducción adicional del ancho máximo para pantallas más pequeñas */
             }
 
             .navbar ul li {
                 margin-right: 10px;
-            }
-
-            .content-card {
-                padding: 10px;
-                margin-bottom: 10px;
             }
         }
 
