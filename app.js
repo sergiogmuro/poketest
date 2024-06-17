@@ -28,12 +28,16 @@ document.addEventListener('DOMContentLoaded', function () {
         return false;
     }
 
-    async function loadData(cacheKey, url, displayFunction, title, styles) {
-        console.log(`LOADING ${cacheKey?.toUpperCase()}`);
+    async function loadData(cacheKey, url, displayFunction, containerClass, title, styles) {
+        content.querySelector('#lists').style.display = 'flex';
+        const containerDiv = content.querySelector(`${containerClass}`);
+        containerDiv.innerHTML = '';
+        content.querySelector(`#video`).innerHTML = '';
+
         if (isCacheValid(cacheKey)) {
             const cachedData = JSON.parse(localStorage.getItem(`cached_${cacheKey}_${url}`));
             if (cachedData) {
-                displayFunction(cachedData, title, title, styles);
+                displayFunction(cachedData, containerDiv, title, styles);
                 return;
             }
         }
@@ -56,12 +60,12 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem(`${cacheKey}_cacheUpdateTime`, getCurrentTime());
         localStorage.setItem(`cached_${cacheKey}_${url}`, JSON.stringify(dataMap));
 
-        displayFunction(dataMap, title, title, styles);
+        displayFunction(dataMap, containerDiv, title, styles);
     }
 
-    function displayData(dataMap, containerClass, title, styles) {
-        content.innerHTML = `<h1>${title}</h1><div class="${containerClass} ${styles}"></div>`;
-        const containerDiv = content.querySelector(`.${containerClass}`);
+    function displayData(dataMap, containerDiv, title, styles) {
+        content.querySelector(`#title`).innerText = title;
+        // content.innerHTML = `<h1>${title}</h1><div class="${containerClass} ${styles}"></div>`;
 
         let index = 0;
         for (const [itemLink, itemNames] of Object.entries(dataMap)) {
@@ -98,8 +102,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setupVideoPlayer(url) {
-        content.innerHTML = '<h1>Video</h1><div class="video"></div>';
-        const videoContainer = content.querySelector('.video');
+        content.querySelector('#lists').style.display = 'none';
+        const videoContainer = content.querySelector('#video');
 
         const videoElement = document.createElement('video');
         videoElement.id = 'pokemon-video';
@@ -132,10 +136,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (hash.includes('temporada-') && hash.includes('episodio-')) {
                 playEpisodeVideo(hash);
             } else {
-                loadData('episodes', hash, displayData, 'EPISODIOS', 'right');
+                loadData('episodes', hash, displayData, '#episodes-list', 'EPISODIOS', 'right');
             }
-        } else {
-            loadData('series', `${baseURL}/serie-ash`, displayData, 'TEMPORADAS');
         }
     });
 
@@ -144,9 +146,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.location.hash.includes('temporada-') && window.location.hash.includes('episodio-')) {
             playEpisodeVideo(window.location.hash.substring(1));
         } else {
-            loadData('episodes', window.location.hash.substring(1), displayData, 'EPISODIOS', 'right');
+            loadData('episodes', window.location.hash.substring(1), displayData, '#episodes-list', 'EPISODIOS', 'right');
         }
-    } else {
-        loadData('series', `${baseURL}/serie-ash`, displayData, 'TEMPORADAS');
     }
+
+    loadData('series', `${baseURL}/serie-ash`, displayData, '#sessions-list', 'TEMPORADAS');
 });
