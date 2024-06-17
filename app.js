@@ -8,6 +8,7 @@ function hideLoading() {
 }
 
 let titleName = null;
+let videoUrl = null;
 
 document.addEventListener('DOMContentLoaded', function () {
     const content = document.getElementById('content');
@@ -22,6 +23,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function setName(name) {
         titleName = name;
+    }
+
+    function setVideoUrl(url) {
+        videoUrl = url;
     }
 
     function updateURL(hash) {
@@ -58,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (lastUpdateTime) {
             const currentTime = getCurrentTime();
             const timeElapsed = currentTime - parseInt(lastUpdateTime);
-            const oneHourInMillis = 60 * 60 * 1000; // 1 hora en milisegundos
+            const oneHourInMillis = 60 * 60 * 1000 * 12; // 12 horas en milisegundos
             return timeElapsed < oneHourInMillis;
         }
         return false;
@@ -70,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
         content.querySelector('#lists').style.display = 'flex';
         const containerDiv = content.querySelector(`${containerClass}`);
         containerDiv.innerHTML = '';
-        content.querySelector(`#video`).innerHTML = '';
+        content.querySelector(`#video-container`).innerHTML = '';
 
         if (isCacheValid(cacheKey)) {
             const cachedData = JSON.parse(localStorage.getItem(`cached_${cacheKey}_${url}`));
@@ -110,6 +115,23 @@ document.addEventListener('DOMContentLoaded', function () {
         let index = 0;
         for (const [itemLink, itemNames] of Object.entries(dataMap)) {
             index = index + 1;
+
+            const seasonAndEpisode = extractSeasonAndEpisode(itemLink);
+            let videoUrl = null;
+            if (seasonAndEpisode) {
+                videoUrl = buildVideoUrl(seasonAndEpisode.season, seasonAndEpisode.episode);
+            }
+            const videoKey = `pokemon-video-time-${videoUrl}`;
+
+            const savedTime = localStorage.getItem(videoKey);
+            let progress = null;
+            let total = null;
+            if (savedTime) {
+                const savedProgress = JSON.parse(savedTime);
+                progress = savedProgress.c;
+                total = savedProgress.t;
+            }
+
             const a = document.createElement('a');
             const itemNamesTrimmed = itemNames.map(name => name.trim());
 
@@ -122,8 +144,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.preventDefault();
                 setName(itemName)
                 updateURL(itemLink);
-                // handleItemClick(a)
+                handleItemClick(a)
             });
+
+            if (progress) {
+                const percentage = (parseFloat(progress) / total) * 100;
+                a.style.border = `1px solid #0056b3`;
+                a.style.color = `black`;
+                a.style.background = `linear-gradient(to right, #0056b3 ${percentage}%, transparent ${percentage}%)`;
+            }
 
             containerDiv.appendChild(a);
         }
@@ -148,13 +177,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setupVideoPlayer(url) {
+        setVideoUrl(url)
+
         content.querySelector('#lists').style.display = 'none';
-        const videoContainer = content.querySelector('#video');
+        const videoContainer = content.querySelector('#video-container');
 
         const videoElement = document.createElement('video');
         videoElement.id = 'pokemon-video';
         videoElement.controls = true;
         videoElement.style.width = '100%';
+
+        videoFunctions(videoElement)
 
         videoContainer.appendChild(videoElement);
 
@@ -162,6 +195,66 @@ document.addEventListener('DOMContentLoaded', function () {
         videoElement.requestFullscreen()
         videoElement.load();
         videoElement.play();
+
+    }
+
+    function videoFunctions(videoElement) {
+        const video = videoElement;
+        const progressBar = document.getElementById('progress-bar');
+
+        if (video) {
+            const videoKey = `pokemon-video-time-${videoUrl}`;
+
+            const savedTime = localStorage.getItem(videoKey);
+            if (savedTime) {
+                video.currentTime = parseFloat(JSON.parse(savedTime).c) - 3;
+            }
+
+            video.addEventListener('timeupdate', function () {
+                const percentage = (video.currentTime / video.duration) * 100;
+                // progressBar.value = percentage;
+                localStorage.setItem(videoKey, `{"c": "${video.currentTime}", "t": "${video.duration}"}`);
+            });
+
+        }
+
+        // progressBar.addEventListener('input', function () {
+        //     const time = (progressBar.value / 100) * video.duration;
+        //     video.currentTime = time;
+        // });
+
+        document.addEventListener('keydown', function (event) {
+            if (document.activeElement === video || document.activeElement === progressBar) {
+                switch (event.key) {
+                    case ' ':
+                    case 'Enter':
+                        if (video.paused) {
+                            video.play();
+                        } else {
+                            video.pause();
+                        }
+                        break;
+                    case 'ArrowRight':
+                        video.currentTime += 10; // Adelanta 5 segundos
+                        break;
+                    case 'ArrowLeft':
+                        video.currentTime -= 10; // Retrocede 5 segundos
+                        break;
+                    case 'Escape':
+                    case 'Backspace':
+                        window.history.back(); // Salta atrás
+                        break;
+                }
+            }
+        });
+
+        video.addEventListener('click', function () {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        });
     }
 
     function playEpisodeVideo(episodeURL) {

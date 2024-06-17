@@ -72,11 +72,12 @@
         }
 
         #sessions-list a,
-        #sessions-list button{
+        #sessions-list button {
             background-color: transparent;
             border: 1px solid #007bff;
             color: #007bff;
         }
+
         #sessions-list a:hover,
         #sessions-list button:hover {
             background-color: #ccc;
@@ -178,6 +179,48 @@
         }
 
 
+        #video-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            text-align: center;
+        }
+
+        #pokemon-video {
+            width: 100%;
+            height: auto;
+        }
+
+        #progress-container {
+            width: 100%;
+            position: relative;
+        }
+
+        #progress-bar {
+            width: 100%;
+            appearance: none;
+            background: #444;
+            height: 5px;
+            cursor: pointer;
+        }
+
+        #progress-bar::-webkit-slider-thumb {
+            appearance: none;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        #progress-bar::-moz-range-thumb {
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+
     </style>
 </head>
 <body>
@@ -191,7 +234,12 @@
         </div>
     </div>
     <h1 id="title">Temporadas</h1>
-    <div id="video"></div>
+    <div id="video" style="/*display: none;*/">
+        <div id="video-container"></div>
+<!--        <div id="progress-container">-->
+<!--            <input type="range" id="progress-bar" value="0" min="0" max="100">-->
+<!--        </div>-->
+    </div>
     <div id="lists">
         <div id="sessions-list"></div>
         <div id="episodes-list"></div>
