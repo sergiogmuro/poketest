@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem(`${cacheKey}_cacheUpdateTime`, getCurrentTime());
         localStorage.setItem(`cached_${cacheKey}_${url}`, JSON.stringify(dataMap));
 
-        displayFunction(dataMap);
+        displayFunction(dataMap, title, title);
     }
 
     function displayData(dataMap, containerClass, title) {
