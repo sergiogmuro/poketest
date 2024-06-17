@@ -28,12 +28,12 @@ document.addEventListener('DOMContentLoaded', function () {
         return false;
     }
 
-    async function loadData(cacheKey, url, displayFunction, title) {
+    async function loadData(cacheKey, url, displayFunction, title, styles) {
         console.log(`LOADING ${cacheKey?.toUpperCase()}`);
         if (isCacheValid(cacheKey)) {
             const cachedData = JSON.parse(localStorage.getItem(`cached_${cacheKey}_${url}`));
             if (cachedData) {
-                displayFunction(cachedData, title, title);
+                displayFunction(cachedData, title, title, styles);
                 return;
             }
         }
@@ -59,8 +59,8 @@ document.addEventListener('DOMContentLoaded', function () {
         displayFunction(dataMap, title, title);
     }
 
-    function displayData(dataMap, containerClass, title) {
-        content.innerHTML = `<h1>${title}</h1><div class="${containerClass}"></div>`;
+    function displayData(dataMap, containerClass, title, styles) {
+        content.innerHTML = `<h1>${title}</h1><div class="${containerClass} ${styles}"></div>`;
         const containerDiv = content.querySelector(`.${containerClass}`);
 
         let index = 0;
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (hash.includes('temporada-') && hash.includes('episodio-')) {
                 playEpisodeVideo(hash);
             } else {
-                loadData('episodes', hash, displayData, 'EPISODIOS');
+                loadData('episodes', hash, displayData, 'EPISODIOS', 'right');
             }
         } else {
             loadData('series', `${baseURL}/serie-ash`, displayData, 'TEMPORADAS');
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.location.hash.includes('temporada-') && window.location.hash.includes('episodio-')) {
             playEpisodeVideo(window.location.hash.substring(1));
         } else {
-            loadData('episodes', window.location.hash.substring(1), displayData, 'EPISODIOS');
+            loadData('episodes', window.location.hash.substring(1), displayData, 'EPISODIOS', 'right');
         }
     } else {
         loadData('series', `${baseURL}/serie-ash`, displayData, 'TEMPORADAS');
