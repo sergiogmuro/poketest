@@ -223,8 +223,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function restartFadeOutAnimation() {
             controls.classList.remove('fade-out-element');
+            document.getElementById('title').classList.remove('fade-out-element');
             void controls.offsetWidth; // Truco para reiniciar la animación
             controls.classList.add('fade-out-element');
+            document.getElementById('title').classList.add('fade-out-element');
         }
 
         document.body.classList.add('video');
