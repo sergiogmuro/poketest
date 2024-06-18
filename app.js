@@ -15,7 +15,7 @@ function hideCursor() {
     document.body.style.cursor = 'none';
 }
 
-let titleName = null;
+let titleName = '';
 let videoUrl = null;
 let isInVideo = false;
 
@@ -276,6 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         exitFullscreenButton.addEventListener('click', () => {
             customVideoPlayer.classList.add('hidden');
+            document.getElementById('title').classList.remove('fade-out-element');
             document.body.classList.remove('video');
             window.history.back();
             videoElement.pause();
@@ -321,6 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showCursor();
 
                 customVideoPlayer.classList.add('hidden');
+                document.getElementById('title').classList.remove('fade-out-element');
                 window.history.back();
                 document.body.classList.remove('video');
                 videoElement.pause();
@@ -345,6 +347,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     case 'Escape':
                     case 'Backspace':
                         showCursor();
+                        document.getElementById('title').classList.remove('fade-out-element');
                         document.body.classList.remove('video');
                         window.history.back();
                         break;
@@ -385,6 +388,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 loadData('episodes', hash, displayData, '#episodes-list', 'EPISODIOS', 'right');
             }
         }
+        document.getElementById('title').classList.remove('fade-out-element');
     });
 
     // Initial load
@@ -398,6 +402,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     showCursor();
 
+    document.getElementById('title').classList.remove('fade-out-element');
     document.body.classList.remove('video');
     loadData('series', `${baseURL}/serie-ash`, displayData, '#sessions-list', 'TEMPORADAS');
 });
