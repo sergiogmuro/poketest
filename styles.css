@@ -174,6 +174,17 @@ button:hover {
     }
 }
 
+body.video {
+    background: black;
+}
+
+body.video h1 {
+    position: absolute;
+    top: 10px;
+}
+body.video #controls {
+    display: flex;
+}
 
 #video-container {
     clear: both;
@@ -184,14 +195,8 @@ button:hover {
     position: relative;
 }
 
-#custom-video-player {
-    width: 100%;
-    max-width: 800px;
-    position: relative;
-}
-
 #controls {
-    display: flex;
+    display: none;
     justify-content: space-between;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.7);
@@ -221,4 +226,14 @@ button:hover {
 
 .hidden {
     display: none;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.fade-out-element {
+    animation: fadeOut 5s forwards; /* 5 segundos de duración */
 }

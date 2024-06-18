@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
         content.querySelector('#lists').style.display = 'flex';
         const containerDiv = content.querySelector(`${containerClass}`);
         containerDiv.innerHTML = '';
-        content.querySelector(`#video-container`).innerHTML = '';
+        // content.querySelector(`#video-container`).innerHTML = '';
 
         if (isCacheValid(cacheKey)) {
             const cachedData = JSON.parse(localStorage.getItem(`cached_${cacheKey}_${url}`));
@@ -192,18 +192,20 @@ document.addEventListener('DOMContentLoaded', function () {
         content.querySelector('#lists').style.display = 'none';
         const videoContainer = content.querySelector('#video-container');
 
-        const videoElement = document.createElement('video');
-        videoElement.id = 'pokemon-video';
-        videoElement.controls = false;
-        videoElement.textContent = titleName;
-        videoElement.style.width = '100%';
+        const videoElement = videoContainer.querySelector('#pokemon-video');
+        console.log(videoElement);
+        // const videoElement = document.createElement('video');
+        // videoElement.id = 'pokemon-video';
+        // videoElement.controls = false;
+        // videoElement.textContent = titleName;
+        videoElement.style.height = '100vh';
 
         videoFunctions(videoElement)
 
         videoContainer.appendChild(videoElement);
 
         videoElement.src = url;
-        videoElement.requestFullscreen()
+        // videoElement.requestFullscreen()
         videoElement.load();
         videoElement.play();
 
@@ -211,58 +213,71 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function videoFunctions(videoElement) {
-        const video = videoElement;
-
         const customVideoPlayer = document.getElementById('video');
         const playPauseButton = document.getElementById('play-pause');
         const rewindButton = document.getElementById('rewind');
         const fastForwardButton = document.getElementById('fast-forward');
         const exitFullscreenButton = document.getElementById('exit-fullscreen');
         const progressBar = document.getElementById('progress-bar');
+        const controls = document.getElementById('controls');
+
+        function restartFadeOutAnimation() {
+            controls.classList.remove('fade-out-element');
+            void controls.offsetWidth; // Truco para reiniciar la animación
+            controls.classList.add('fade-out-element');
+        }
+
+        document.body.classList.add('video');
+        restartFadeOutAnimation()
 
         customVideoPlayer.classList.remove('hidden');
 
-        if (video) {
+        if (videoElement) {
             const videoKey = `pokemon-video-time-${videoUrl}`;
 
             const savedTime = localStorage.getItem(videoKey);
             if (savedTime) {
-                video.currentTime = parseFloat(JSON.parse(savedTime).c) - 3;
+                videoElement.currentTime = parseFloat(JSON.parse(savedTime).c) - 3;
             }
 
-            video.addEventListener('timeupdate', function () {
-                progressBar.value = (video.currentTime / video.duration) * 100;
-                localStorage.setItem(videoKey, `{"c": "${video.currentTime}", "t": "${video.duration}"}`);
+            videoElement.addEventListener('timeupdate', function () {
+                progressBar.value = (videoElement.currentTime / videoElement.duration) * 100;
+                localStorage.setItem(videoKey, `{"c": "${videoElement.currentTime}", "t": "${videoElement.duration}"}`);
             });
-
         }
 
         progressBar.addEventListener('input', function () {
-            video.currentTime = (progressBar.value / 100) * video.duration;
+            videoElement.currentTime = (progressBar.value / 100) * videoElement.duration;
         });
 
 
         playPauseButton.addEventListener('click', () => {
-            if (video.paused) {
-                video.play();
+            if (videoElement.paused) {
+                videoElement.play();
                 playPauseButton.innerText = 'Pause';
             } else {
-                video.pause();
+                videoElement.pause();
                 playPauseButton.innerText = 'Play';
             }
+            restartFadeOutAnimation()
         });
 
         rewindButton.addEventListener('click', () => {
-            video.currentTime -= 10;
+            videoElement.currentTime -= 10;
+            restartFadeOutAnimation()
         });
 
         fastForwardButton.addEventListener('click', () => {
-            video.currentTime += 10;
+            videoElement.currentTime += 10;
+            restartFadeOutAnimation()
         });
 
         exitFullscreenButton.addEventListener('click', () => {
             customVideoPlayer.classList.add('hidden');
-            video.pause();
+            document.body.classList.remove('video');
+            window.history.back();
+            videoElement.pause();
+            restartFadeOutAnimation()
         });
 
         const fullscreenButton = document.getElementById('fullscreen');
@@ -277,24 +292,27 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (videoElement.msRequestFullscreen) { /* IE/Edge */
                 videoElement.msRequestFullscreen();
             }
+            restartFadeOutAnimation()
         });
 
         document.addEventListener('keydown', (event) => {
             if(!isInVideo) return false;
 
+            restartFadeOutAnimation()
+
             const key = event.key;
 
             if (key === 'ArrowLeft') {
-                video.currentTime -= 5;
+                videoElement.currentTime -= 5;
             } else if (key === 'ArrowRight') {
-                video.currentTime += 5;
+                videoElement.currentTime += 5;
             } else if (key === ' ') {
                 event.preventDefault();
-                if (video.paused) {
-                    video.play();
+                if (videoElement.paused) {
+                    videoElement.play();
                     playPauseButton.innerText = 'Pause';
                 } else {
-                    video.pause();
+                    videoElement.pause();
                     playPauseButton.innerText = 'Play';
                 }
             } else if (key === 'Escape') {
@@ -302,39 +320,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 customVideoPlayer.classList.add('hidden');
                 window.history.back();
-                video.pause();
+                document.body.classList.remove('video');
+                videoElement.pause();
             }
 
-            if (document.activeElement === video || document.activeElement === progressBar) {
+            if (document.activeElement === videoElement || document.activeElement === progressBar) {
                 switch (event.key) {
                     case ' ':
                     case 'Enter':
-                        if (video.paused) {
-                            video.play();
+                        if (videoElement.paused) {
+                            videoElement.play();
                         } else {
-                            video.pause();
+                            videoElement.pause();
                         }
                         break;
                     case 'ArrowRight':
-                        video.currentTime += 10; // Adelanta 5 segundos
+                        videoElement.currentTime += 10; // Adelanta 5 segundos
                         break;
                     case 'ArrowLeft':
-                        video.currentTime -= 10; // Retrocede 5 segundos
+                        videoElement.currentTime -= 10; // Retrocede 5 segundos
                         break;
                     case 'Escape':
                     case 'Backspace':
                         showCursor();
-                        window.history.back(); // Salta atrás
+                        document.body.classList.remove('video');
+                        window.history.back();
                         break;
                 }
             }
         });
 
-        video.addEventListener('click', function () {
-            if (video.paused) {
-                video.play();
+        videoElement.addEventListener('click', function () {
+            if (videoElement.paused) {
+                videoElement.play();
             } else {
-                video.pause();
+                videoElement.pause();
             }
         });
     }
@@ -376,5 +396,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     showCursor();
 
+    document.body.classList.remove('video');
     loadData('series', `${baseURL}/serie-ash`, displayData, '#sessions-list', 'TEMPORADAS');
 });
