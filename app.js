@@ -17,6 +17,7 @@ function hideCursor() {
 
 let titleName = null;
 let videoUrl = null;
+let isInVideo = false;
 
 document.addEventListener('DOMContentLoaded', function () {
     const content = document.getElementById('content');
@@ -185,6 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setupVideoPlayer(url) {
+        isInVideo = true;
         setVideoUrl(url)
 
         content.querySelector('#lists').style.display = 'none';
@@ -229,16 +231,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             video.addEventListener('timeupdate', function () {
-                const percentage = (video.currentTime / video.duration) * 100;
-                progressBar.value = percentage;
+                progressBar.value = (video.currentTime / video.duration) * 100;
                 localStorage.setItem(videoKey, `{"c": "${video.currentTime}", "t": "${video.duration}"}`);
             });
 
         }
 
         progressBar.addEventListener('input', function () {
-            const time = (progressBar.value / 100) * video.duration;
-            video.currentTime = time;
+            video.currentTime = (progressBar.value / 100) * video.duration;
         });
 
 
@@ -280,6 +280,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         document.addEventListener('keydown', (event) => {
+            if(!isInVideo) return false;
+
             const key = event.key;
 
             if (key === 'ArrowLeft') {
@@ -302,9 +304,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.history.back();
                 video.pause();
             }
-        });
 
-        document.addEventListener('keydown', function (event) {
             if (document.activeElement === video || document.activeElement === progressBar) {
                 switch (event.key) {
                     case ' ':
@@ -354,6 +354,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     window.addEventListener('hashchange', () => {
+        isInVideo = false;
         const hash = window.location.hash.substring(1);
         if (hash) {
             if (hash.includes('temporada-') && hash.includes('episodio-')) {
