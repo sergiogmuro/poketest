@@ -282,20 +282,20 @@ document.addEventListener('DOMContentLoaded', function () {
             restartFadeOutAnimation()
         });
 
-        const fullscreenButton = document.getElementById('fullscreen');
-
-        fullscreenButton.addEventListener('click', () => {
-            if (videoElement.requestFullscreen) {
-                videoElement.requestFullscreen();
-            } else if (videoElement.mozRequestFullScreen) { /* Firefox */
-                videoElement.mozRequestFullScreen();
-            } else if (videoElement.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-                videoElement.webkitRequestFullscreen();
-            } else if (videoElement.msRequestFullscreen) { /* IE/Edge */
-                videoElement.msRequestFullscreen();
-            }
-            restartFadeOutAnimation()
-        });
+        // const fullscreenButton = document.getElementById('fullscreen');
+        //
+        // fullscreenButton.addEventListener('click', () => {
+        //     if (videoElement.requestFullscreen) {
+        //         videoElement.requestFullscreen();
+        //     } else if (videoElement.mozRequestFullScreen) { /* Firefox */
+        //         videoElement.mozRequestFullScreen();
+        //     } else if (videoElement.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+        //         videoElement.webkitRequestFullscreen();
+        //     } else if (videoElement.msRequestFullscreen) { /* IE/Edge */
+        //         videoElement.msRequestFullscreen();
+        //     }
+        //     restartFadeOutAnimation()
+        // });
 
         document.addEventListener('keydown', (event) => {
             if(!isInVideo) return false;
