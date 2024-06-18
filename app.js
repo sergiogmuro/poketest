@@ -230,16 +230,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             video.addEventListener('timeupdate', function () {
                 const percentage = (video.currentTime / video.duration) * 100;
-                // progressBar.value = percentage;
+                progressBar.value = percentage;
                 localStorage.setItem(videoKey, `{"c": "${video.currentTime}", "t": "${video.duration}"}`);
             });
 
         }
 
-        // progressBar.addEventListener('input', function () {
-        //     const time = (progressBar.value / 100) * video.duration;
-        //     video.currentTime = time;
-        // });
+        progressBar.addEventListener('input', function () {
+            const time = (progressBar.value / 100) * video.duration;
+            video.currentTime = time;
+        });
 
 
         playPauseButton.addEventListener('click', () => {
