@@ -19,6 +19,7 @@
     <h1 id="title">Temporadas</h1>
     <div id="video" class="hidden">
         <div id="video-container">
+            <button id="next-episode" class="hidden">Siguiente episodio</button>
             <video src="#" id="pokemon-video" nocontrols></video>
         </div>
         <div id="controls">
@@ -28,7 +29,9 @@
             <button id="exit-fullscreen">Exit</button>
 <!--            <button id="fullscreen">Fullscreen</button>-->
             <div id="progress-container">
+                <span id="progress-time">--:--</span>
                 <progress id="progress-bar" value="0" max="100"></progress>
+                <span id="duration-total">--:--</span>
             </div>
         </div>
     </div>
