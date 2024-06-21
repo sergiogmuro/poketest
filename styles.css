@@ -248,9 +248,30 @@ body.video #controls {
     animation: fadeOut 5s forwards; /* 5 segundos de duración */
 }
 
+@keyframes bgTransition {
+    0% {
+        background-position: 100% 0%;
+    }
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
 #next-episode {
     position: fixed;
     bottom: 100px;
     right: 50px;
     z-index: 1000;
+    font-size: 22px;
+    background: linear-gradient(to right, white 50%, #0056b3 50%);
+    background-size: 200% 100%;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    animation: bgTransition 10s linear;
+}
+
+#next-episode:hover {
+    animation-play-state: paused; /* Pausa la animación al pasar el ratón */
 }

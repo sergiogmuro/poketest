@@ -173,7 +173,6 @@ document.addEventListener('DOMContentLoaded', function () {
             itemName = `${index}. ${itemName}`;
 
             const seasonAndEpisode = extractSeasonAndEpisode(itemLink);
-            // console.log(seasonAndEpisode, itemLink.replace(BASE_LATIN_URL_LIST + SERIE_URL, ''))
 
             let newUrl = '?season=' + seasonAndEpisode.season
             if (seasonAndEpisode.episode) {
@@ -182,13 +181,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             a.innerText = itemName;
             a.href = newUrl;
-            // a.addEventListener('click', (e) => {
-            //     e.preventDefault();
-            //     setName(itemName)
-            //     // updateURL(itemLink);
-            //     // handleItemClick(a)
-            //     window.location.href = newUrl
-            // });
 
             if (progress) {
                 const percentage = (parseFloat(progress) / total) * 100;
@@ -229,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function buildVideoUrl(season, episode) {
-        return `${BASE_LATIN_URL_VIDEO}${SERIE_URL}/t${'0'.padEnd(2, season)}/t${'0'.padEnd(2, season)}_e${'0'.padEnd(2, episode)}.es-la.mp4`;
+        return `${BASE_LATIN_URL_VIDEO}${SERIE_URL}/t${season.toString().padStart(2, '0')}/t${season.toString().padStart(2, '0')}_e${episode.toString().padStart(2, '0')}.es-la.mp4`;
     }
 
     function setupVideoPlayer(url) {
@@ -355,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function () {
             customVideoPlayer.classList.add('hidden');
             titleElement.classList.remove('fade-out-element');
             document.body.classList.remove('video');
-           // window.history.back();
+            // window.history.back();
             const urlParams = new URLSearchParams(window.location.search);
             window.location.href = '?season=' + urlParams.get('season');
         }
@@ -448,7 +440,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             nextEpisodeBtn.addEventListener('click', () => {
                 window.location.href = nextLink;
-                nextEpisodeBtn.remove();
+                // nextEpisodeBtn.remove();
+            });
+
+            nextEpisodeBtn.addEventListener('animationend', () => {
+                window.location.href = nextLink;
+                // nextEpisodeBtn.remove();
             });
         }
     }
@@ -498,38 +495,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.addEventListener('popstate', handleURLChange);
 
-// Initial Loading
+    // Initial Loading
     handleURLChange();
-
-    //
-    // function handleHashChange() {
-    //     isInVideo = false;
-    //     showCursor();
-    //
-    //     document.getElementById('title').classList.remove('fade-out-element');
-    //     document.getElementById('next-episode').classList.add('hidden')
-    //     document.body.classList.remove('video');
-    //
-    //     // LOADING SERIES LIST
-    //     loadData('series', `${baseURL}/serie-ash`, CONTAINER_SESSIONS_LIST_ID, 'TEMPORADAS');
-    //
-    //     const hash = window.location.hash.substring(1);
-    //     if (hash) {
-    //         if (hash.includes('temporada-')) {
-    //             // LOADING EPISODES LIST
-    //             loadData('episodes', hash, CONTAINER_EPISODES_LIST_ID, 'EPISODIOS', 'right');
-    //             console.log('DATA SESSION')
-    //             if (hash.includes('episodio-')) {
-    //                 // PLAYING VIDEO
-    //                 console.log('DATA vide')
-    //                 playEpisodeVideo(hash);
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // window.addEventListener('hashchange', handleHashChange);
-    //
-    // // Initial Loading
-    // handleHashChange();
 });
