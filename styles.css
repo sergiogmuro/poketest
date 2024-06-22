@@ -174,7 +174,6 @@ body.video #controls {
 
 #video-container {
     clear: both;
-    margin-top: 20px;
     display: flex;
     justify-content: center;
     align-items: center;

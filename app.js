@@ -257,7 +257,9 @@ document.addEventListener('DOMContentLoaded', function () {
             controls.classList.add('fade-out-element');
             document.getElementById('title').classList.add('fade-out-element');
 
-            setTimeout(hideCursor, 5000);
+            controls.addEventListener('animationend', () => {
+                hideCursor()
+            });
         }
 
         document.body.classList.add('video');
