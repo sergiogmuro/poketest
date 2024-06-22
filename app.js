@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return parser.parseFromString(text, 'text/html');
     }
 
-    function setName(name) {
+    function setTitleName(name) {
         titleName = name;
     }
 
@@ -48,37 +48,8 @@ document.addEventListener('DOMContentLoaded', function () {
         videoUrl = url;
     }
 
-    function updateURL(season, episode) {
-        const url = new URL(window.location);
-        const searchParams = new URLSearchParams(url.search);
-        searchParams.set('season', season);
-        searchParams.set('episode', episode);
-        url.search = searchParams.toString();
-        window.history.pushState({}, '', url);
-    }
-
-
     function getCurrentTime() {
         return new Date().getTime();
-    }
-
-
-    function handleItemClick(e) {
-        if (!Element.prototype.closest) {
-            console.error('El navegador no es compatible con el método closest.');
-            return;
-        }
-
-
-        const clickedElement = e;
-        const seasonAndEpisode = extractSeasonAndEpisode(clickedElement.getAttribute('href'));
-        console.log(seasonAndEpisode)
-        if (seasonAndEpisode) {
-            e.preventDefault();
-            const {season, episode} = seasonAndEpisode;
-            setName(clickedElement.innerText.trim());
-            // updateURL(season, episode);
-        }
     }
 
     function isCacheValid(cacheKey) {
@@ -92,17 +63,16 @@ document.addEventListener('DOMContentLoaded', function () {
         return false;
     }
 
-    async function loadData(cacheKey, url, containerClass, title, styles) {
+    async function loadData(cacheKey, url, containerClass, title) {
         showLoading();
 
         content.querySelector('#lists').style.display = 'flex';
         const containerDiv = content.querySelector(`${containerClass}`);
-        // content.querySelector(`#video-container`).innerHTML = '';
 
         if (isCacheValid(cacheKey)) {
             const cachedData = JSON.parse(localStorage.getItem(`cached_${cacheKey}_${url}`));
             if (cachedData) {
-                displayData(cachedData, containerDiv, title, styles);
+                displayData(cachedData, containerDiv, title);
                 return;
             }
         }
@@ -128,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem(`${cacheKey}_cacheUpdateTime`, getCurrentTime());
         localStorage.setItem(`cached_${cacheKey}_${url}`, JSON.stringify(dataMap));
 
-        displayData(dataMap, containerDiv, title, styles);
+        displayData(dataMap, containerDiv, title);
     }
 
     function getVideoCacheKey(videoUrl) {
@@ -136,11 +106,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return `pokemon-video-time-${videoUrl}`;
     }
 
-    function displayData(dataMap, containerDiv, title, styles) {
+    function displayData(dataMap, containerDiv, title) {
         hideLoading();
 
-        content.querySelector(`#title`).innerText = title + ' - ' + titleName;
-        // content.innerHTML = `<h1>${title}</h1><div class="${containerClass} ${styles}"></div>`;
+        content.querySelector(`#title`).innerText = title;
         containerDiv.innerHTML = '';
 
         let index = 0;
@@ -150,11 +119,14 @@ document.addEventListener('DOMContentLoaded', function () {
             let progress = null;
             let total = null;
 
+            const seasonAndEpisode = extractSeasonAndEpisode(itemLink);
+            const season = seasonAndEpisode.season;
+            const episode = seasonAndEpisode.episode;
+
             if (`#${containerDiv.id}` === CONTAINER_EPISODES_LIST_ID) {
-                const seasonAndEpisode = extractSeasonAndEpisode(itemLink);
                 let videoUrl = null;
-                if (seasonAndEpisode) {
-                    videoUrl = buildVideoUrl(seasonAndEpisode.season, seasonAndEpisode.episode);
+                if (season && episode) {
+                    videoUrl = buildVideoUrl(season, episode);
                 }
                 const videoKey = getVideoCacheKey(videoUrl);
 
@@ -172,19 +144,20 @@ document.addEventListener('DOMContentLoaded', function () {
             let itemName = itemNamesTrimmed.join(' ');
             itemName = `${index}. ${itemName}`;
 
-            const seasonAndEpisode = extractSeasonAndEpisode(itemLink);
-
-            let newUrl = '?season=' + seasonAndEpisode.season
-            if (seasonAndEpisode.episode) {
-                newUrl += '&episode=' + seasonAndEpisode.episode
+            let newId = `t${season}`;
+            let newUrl = '?season=' + season
+            if (episode) {
+                newUrl += '&episode=' + episode
+                newId += `-e${episode}`
             }
 
             a.innerText = itemName;
+            a.id = newId;
             a.href = newUrl;
 
             if (progress) {
                 const percentage = (parseFloat(progress) / total) * 100;
-                a.style.border = `1px solid #0056b3`;
+                a.style.border = `1px solid #616b93`;
                 a.style.color = `black`;
                 a.style.background = `linear-gradient(to right, #0056b3 ${percentage}%, transparent ${percentage}%)`;
             }
@@ -322,101 +295,106 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
             });
-        }
 
-        function updateVideoTime() {
-            progressTime.innerHTML = formatTime(videoElement.currentTime);
-            totalDuration.innerHTML = formatTime(videoElement.duration);
-        }
+            function updateVideoTime() {
+                progressTime.innerHTML = formatTime(videoElement.currentTime);
+                totalDuration.innerHTML = formatTime(videoElement.duration);
+            }
 
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = Math.floor(seconds % 60);
-            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = Math.floor(seconds % 60);
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
 
-        function exitPlayer() {
-            const customVideoPlayer = document.getElementById('video');
-            const titleElement = document.getElementById('title');
+            function exitPlayer() {
+                const customVideoPlayer = document.getElementById('video');
+                const titleElement = document.getElementById('title');
 
-            videoElement.pause();
-
-            showCursor();
-            restartFadeOutAnimation();
-
-            customVideoPlayer.classList.add('hidden');
-            titleElement.classList.remove('fade-out-element');
-            document.body.classList.remove('video');
-            // window.history.back();
-            const urlParams = new URLSearchParams(window.location.search);
-            window.location.href = '?season=' + urlParams.get('season');
-        }
-
-        function playPauseVideo() {
-            if (videoElement.paused) {
-                videoElement.play();
-                playPauseButton.innerText = 'Pause';
-            } else {
                 videoElement.pause();
-                playPauseButton.innerText = 'Play';
+
+                showCursor();
+                restartFadeOutAnimation();
+
+                customVideoPlayer.classList.add('hidden');
+                titleElement.classList.remove('fade-out-element');
+                document.body.classList.remove('video');
+                // window.history.back();
+                const urlParams = new URLSearchParams(window.location.search);
+                window.location.href = '?season=' + urlParams.get('season');
             }
-            restartFadeOutAnimation()
+
+            function playPauseVideo() {
+                if (videoElement.paused) {
+                    videoElement.play();
+                    playPauseButton.innerText = 'Pause';
+                } else {
+                    videoElement.pause();
+                    playPauseButton.innerText = 'Play';
+                }
+                restartFadeOutAnimation()
+            }
+
+            progressBar.addEventListener('input', function () {
+                videoElement.currentTime = (progressBar.value / 100) * videoElement.duration;
+            });
+
+            playPauseButton.addEventListener('click', () => {
+                playPauseVideo()
+            });
+
+            rewindButton.addEventListener('click', () => {
+                videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS;
+                restartFadeOutAnimation()
+            });
+
+            fastForwardButton.addEventListener('click', () => {
+                videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS;
+                restartFadeOutAnimation()
+            });
+
+            exitFullscreenButton.addEventListener('click', () => {
+                exitPlayer();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (!isInVideo) return false;
+
+                console.log('keydown')
+                restartFadeOutAnimation();
+
+                const keyActions = {
+                    'ArrowLeft': () => videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS,
+                    'ArrowRight': () => videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS,
+                    ' ': () => {
+                        event.preventDefault();
+                        playPauseVideo()
+                    },
+                    'Escape': exitPlayer,
+                    'Backspace': exitPlayer,
+                    'Enter': () => {
+                        if (videoElement.paused) {
+                            videoElement.play();
+                        } else {
+                            videoElement.pause();
+                        }
+                    }
+                };
+
+                if (keyActions[event.key]) {
+                    keyActions[event.key]();
+                }
+            });
+
+            videoElement.addEventListener('click', () => {
+                playPauseVideo()
+            });
+
+            document.addEventListener('mousemove', ()=>{
+               restartFadeOutAnimation()
+            });
         }
 
-        progressBar.addEventListener('input', function () {
-            videoElement.currentTime = (progressBar.value / 100) * videoElement.duration;
-        });
-
-        playPauseButton.addEventListener('click', () => {
-            playPauseVideo()
-        });
-
-        rewindButton.addEventListener('click', () => {
-            videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS;
-            restartFadeOutAnimation()
-        });
-
-        fastForwardButton.addEventListener('click', () => {
-            videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS;
-            restartFadeOutAnimation()
-        });
-
-        exitFullscreenButton.addEventListener('click', () => {
-            exitPlayer();
-        });
-
-        document.addEventListener('keydown', (event) => {
-            if (!isInVideo) return false;
-
-            console.log('keydown')
-            restartFadeOutAnimation();
-
-            const keyActions = {
-                'ArrowLeft': () => videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS,
-                'ArrowRight': () => videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS,
-                ' ': () => {
-                    event.preventDefault();
-                    playPauseVideo()
-                },
-                'Escape': exitPlayer,
-                'Backspace': exitPlayer,
-                'Enter': () => {
-                    if (videoElement.paused) {
-                        videoElement.play();
-                    } else {
-                        videoElement.pause();
-                    }
-                }
-            };
-
-            if (keyActions[event.key]) {
-                keyActions[event.key]();
-            }
-        });
-
-        videoElement.addEventListener('click', () => {
-            playPauseVideo()
-        });
     }
 
     function playEpisodeVideo(season, episode) {
@@ -428,6 +406,12 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("next episode", nextLink);
             const videoUrl = buildVideoUrl(season, episode);
             console.log(`Reproduciendo video desde: ${videoUrl}`);
+
+            const currentElement = document.getElementById(`t${season}-e${episode}`)
+            setTitleName(currentElement.innerText.trim());
+            console.log("SET TITLE  " + titleName)
+            content.querySelector(`#title`).innerText = titleName;
+
             setupVideoPlayer(videoUrl);
         } else {
             console.error('No se pudo extraer la temporada y episodio de la URL.');
@@ -440,12 +424,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             nextEpisodeBtn.addEventListener('click', () => {
                 window.location.href = nextLink;
-                // nextEpisodeBtn.remove();
             });
 
             nextEpisodeBtn.addEventListener('animationend', () => {
                 window.location.href = nextLink;
-                // nextEpisodeBtn.remove();
+            });
+
+            document.addEventListener('click', () => {
+                nextEpisodeBtn.remove();
             });
         }
     }
@@ -472,17 +458,23 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('next-episode').classList.add('hidden');
         document.body.classList.remove('video');
 
-        // LOADING SERIES LIST
-        loadData('series', ``, CONTAINER_SESSIONS_LIST_ID, 'TEMPORADAS');
-
         const urlParams = new URLSearchParams(window.location.search);
         const season = urlParams.get('season');
         const episode = urlParams.get('episode');
+
+        // LOADING SERIES LIST
+        loadData('series', ``, CONTAINER_SESSIONS_LIST_ID, 'TEMPORADAS').then(function () {
+            if (season) {
+                console.log(document.querySelector(`#t${season}`))
+                document.querySelector(`#t${season}`).classList.add('selected')
+            }
+        });
+
         if (season) {
             const hash = `/temporada-${season}`;
             console.log("SEASON HASH " + hash)
             // LOADING EPISODES LIST
-            loadData('episodes', hash, CONTAINER_EPISODES_LIST_ID, 'EPISODIOS', 'right').then(function () {
+            loadData('episodes', hash, CONTAINER_EPISODES_LIST_ID, 'EPISODIOS').then(function () {
                 if (episode) {
                     const hash = `/temporada-${season}/episodio-${episode}`;
                     console.log("PLAYING HASH " + hash)
@@ -490,6 +482,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     playEpisodeVideo(season, episode);
                 }
             });
+
         }
     }
 

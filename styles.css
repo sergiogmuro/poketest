@@ -4,6 +4,7 @@ body {
     padding: 0;
     font-size: 24px;
 }
+
 body.hide-cursor {
     cursor: none;
 }
@@ -52,8 +53,8 @@ button {
     display: flex;
     padding: 15px 30px;
     margin: 10px;
-    /*width: 45%;*/
-    background-color: #007bff;
+
+    background-color: #4d6659;
     color: #fff;
     text-decoration: none;
     border: none;
@@ -70,18 +71,19 @@ button:hover {
 #sessions-list a,
 #sessions-list button {
     background-color: transparent;
-    border: 1px solid #007bff;
-    color: #007bff;
+    border: 1px solid #4d6659;
+    color: #4d6659;
 }
 
 #sessions-list a:hover,
 #sessions-list button:hover {
     background-color: #ccc;
-    border: 1px solid #007bff;
-    color: #007bff;
+    border: 1px solid #4d6659;
+    color: #4d6659;
 }
 
-.selected {
+#sessions-list a.selected,
+#sessions-list button.selected {
     background-color: #ccc;
     color: #000;
 }
@@ -239,13 +241,19 @@ body.video #controls {
 }
 
 @keyframes fadeOut {
-    0% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { opacity: 0; }
+    0% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 .fade-out-element {
-    animation: fadeOut 5s forwards; /* 5 segundos de duración */
+    animation: fadeOut 5s forwards;
 }
 
 @keyframes bgTransition {
@@ -273,5 +281,5 @@ body.video #controls {
 }
 
 #next-episode:hover {
-    animation-play-state: paused; /* Pausa la animación al pasar el ratón */
+    animation-play-state: paused;
 }
