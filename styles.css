@@ -3,6 +3,8 @@ body {
     margin: 0;
     padding: 0;
     font-size: 24px;
+    background-color: #141414;
+    color: white;
 }
 
 body.hide-cursor {
@@ -15,35 +17,6 @@ body.hide-cursor {
     padding: 20px;
 }
 
-.navbar {
-    background-color: #333;
-    color: #fff;
-    padding: 15px 0;
-}
-
-.navbar ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-
-.navbar ul li {
-    display: inline-block;
-    margin-right: 20px;
-}
-
-.navbar ul li a {
-    color: #fff;
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-}
-
-.navbar ul li a:hover {
-    background-color: #555;
-}
-
 .main-section {
     padding: 20px;
 }
@@ -54,7 +27,7 @@ button {
     padding: 15px 30px;
     margin: 10px;
 
-    background-color: #4d6659;
+    background-color: #5b5b5b;
     color: #fff;
     text-decoration: none;
     border: none;
@@ -71,21 +44,23 @@ button:hover {
 #sessions-list a,
 #sessions-list button {
     background-color: transparent;
-    border: 1px solid #4d6659;
-    color: #4d6659;
+    border: 1px solid #5b5b5b;
+    position: relative;
 }
 
 #sessions-list a:hover,
 #sessions-list button:hover {
     background-color: #ccc;
-    border: 1px solid #4d6659;
-    color: #4d6659;
+    border: 1px solid #5b5b5b;
+    color: black;
+    opacity: 0.8;
 }
 
 #sessions-list a.selected,
 #sessions-list button.selected {
     background-color: #ccc;
     color: #000;
+    opacity: 1;
 }
 
 .content-section {
@@ -134,6 +109,10 @@ button:hover {
 
 #sessions-list, #episodes-list {
     width: 100%;
+}
+#episodes-list a,
+#episodes-list button {
+    position: relative;
 }
 
 #loading {
@@ -282,4 +261,13 @@ body.video #controls {
 
 #next-episode:hover {
     animation-play-state: paused;
+}
+
+.list-progress {
+    height: 4px;
+    width: calc(100% - 12px);
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    margin: 6px;
 }

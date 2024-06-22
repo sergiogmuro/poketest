@@ -155,11 +155,13 @@ document.addEventListener('DOMContentLoaded', function () {
             a.id = newId;
             a.href = newUrl;
 
+            const divProgress = document.createElement('div');
+            divProgress.className = 'list-progress';
+            a.appendChild(divProgress);
+
             if (progress) {
                 const percentage = (parseFloat(progress) / total) * 100;
-                a.style.border = `1px solid #616b93`;
-                a.style.color = `black`;
-                a.style.background = `linear-gradient(to right, #0056b3 ${percentage}%, transparent ${percentage}%)`;
+                divProgress.style.background = `linear-gradient(to right, #f05656 ${percentage}%, transparent ${percentage}%)`;
             }
 
             containerDiv.appendChild(a);
@@ -295,105 +297,99 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
             });
-
-            function updateVideoTime() {
-                progressTime.innerHTML = formatTime(videoElement.currentTime);
-                totalDuration.innerHTML = formatTime(videoElement.duration);
-            }
-
-            function formatTime(seconds) {
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = Math.floor(seconds % 60);
-                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-            }
-
-            function exitPlayer() {
-                const customVideoPlayer = document.getElementById('video');
-                const titleElement = document.getElementById('title');
-
-                videoElement.pause();
-
-                showCursor();
-                restartFadeOutAnimation();
-
-                customVideoPlayer.classList.add('hidden');
-                titleElement.classList.remove('fade-out-element');
-                document.body.classList.remove('video');
-                // window.history.back();
-                const urlParams = new URLSearchParams(window.location.search);
-                window.location.href = '?season=' + urlParams.get('season');
-            }
-
-            function playPauseVideo() {
-                if (videoElement.paused) {
-                    videoElement.play();
-                    playPauseButton.innerText = 'Pause';
-                } else {
-                    videoElement.pause();
-                    playPauseButton.innerText = 'Play';
-                }
-                restartFadeOutAnimation()
-            }
-
-            progressBar.addEventListener('input', function () {
-                videoElement.currentTime = (progressBar.value / 100) * videoElement.duration;
-            });
-
-            playPauseButton.addEventListener('click', () => {
-                playPauseVideo()
-            });
-
-            rewindButton.addEventListener('click', () => {
-                videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS;
-                restartFadeOutAnimation()
-            });
-
-            fastForwardButton.addEventListener('click', () => {
-                videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS;
-                restartFadeOutAnimation()
-            });
-
-            exitFullscreenButton.addEventListener('click', () => {
-                exitPlayer();
-            });
-
-            document.addEventListener('keydown', (event) => {
-                if (!isInVideo) return false;
-
-                console.log('keydown')
-                restartFadeOutAnimation();
-
-                const keyActions = {
-                    'ArrowLeft': () => videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS,
-                    'ArrowRight': () => videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS,
-                    ' ': () => {
-                        event.preventDefault();
-                        playPauseVideo()
-                    },
-                    'Escape': exitPlayer,
-                    'Backspace': exitPlayer,
-                    'Enter': () => {
-                        if (videoElement.paused) {
-                            videoElement.play();
-                        } else {
-                            videoElement.pause();
-                        }
-                    }
-                };
-
-                if (keyActions[event.key]) {
-                    keyActions[event.key]();
-                }
-            });
-
-            videoElement.addEventListener('click', () => {
-                playPauseVideo()
-            });
-
-            document.addEventListener('mousemove', ()=>{
-               restartFadeOutAnimation()
-            });
         }
+
+        function updateVideoTime() {
+            progressTime.innerHTML = formatTime(videoElement.currentTime);
+            totalDuration.innerHTML = formatTime(videoElement.duration);
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function exitPlayer() {
+            // const customVideoPlayer = document.getElementById('video');
+            // const titleElement = document.getElementById('title');
+            //
+            // videoElement.pause();
+            //
+            // showCursor();
+            // restartFadeOutAnimation();
+            //
+            // customVideoPlayer.classList.add('hidden');
+            // titleElement.classList.remove('fade-out-element');
+            // document.body.classList.remove('video');
+            // // window.history.back();
+            const urlParams = new URLSearchParams(window.location.search);
+            window.location.href = '?season=' + urlParams.get('season');
+        }
+
+        function playPauseVideo() {
+            if (videoElement.paused) {
+                videoElement.play();
+                playPauseButton.innerText = 'Pause';
+            } else {
+                videoElement.pause();
+                playPauseButton.innerText = 'Play';
+            }
+            restartFadeOutAnimation()
+        }
+
+        progressBar.addEventListener('input', function () {
+            videoElement.currentTime = (progressBar.value / 100) * videoElement.duration;
+        });
+
+        playPauseButton.addEventListener('click', () => {
+            playPauseVideo()
+        });
+
+        rewindButton.addEventListener('click', () => {
+            videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS;
+            restartFadeOutAnimation()
+        });
+
+        fastForwardButton.addEventListener('click', () => {
+            videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS;
+            restartFadeOutAnimation()
+        });
+
+        exitFullscreenButton.addEventListener('click', () => {
+            exitPlayer();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (!isInVideo) return false;
+
+            console.log('keydown')
+            restartFadeOutAnimation();
+
+            const keyActions = {
+                'ArrowLeft': () => videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS,
+                'ArrowRight': () => videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS,
+                ' ': () => {
+                    event.preventDefault();
+                    playPauseVideo()
+                },
+                'Escape': exitPlayer,
+                'Backspace': exitPlayer,
+                'Enter': playPauseVideo
+            };
+
+            if (keyActions[event.key]) {
+                keyActions[event.key]();
+            }
+        });
+
+        videoElement.addEventListener('click', () => {
+            playPauseVideo()
+        });
+
+        document.addEventListener('mousemove', () => {
+            restartFadeOutAnimation()
+        });
 
     }
 
