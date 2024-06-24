@@ -393,12 +393,9 @@ document.addEventListener('DOMContentLoaded', function () {
             restartFadeOutAnimation();
 
             const keyActions = {
-                'ArrowLeft': () => rewindVideo,
-                'ArrowRight': () => forwardVideo,
-                // ' ': () => {
-                //     event.preventDefault();
-                //     playPauseVideo()
-                // },
+                'ArrowLeft': rewindVideo,
+                'ArrowRight': forwardVideo,
+                ' ': playPauseVideo,
                 'Escape': exitPlayer,
                 'Backspace': exitPlayer,
                 'Enter': playPauseVideo
@@ -502,23 +499,22 @@ document.addEventListener('DOMContentLoaded', function () {
             if (season) {
                 console.log(document.querySelector(`#t${season}`))
                 document.querySelector(`#t${season}`).classList.add('selected')
+
+                const hash = `/temporada-${season}`;
+                console.log("SEASON HASH " + hash)
+                // LOADING EPISODES LIST
+                loadData('episodes', hash, CONTAINER_EPISODES_LIST_ID, 'EPISODIOS').then(function () {
+                    if (episode) {
+                        const hash = `/temporada-${season}/episodio-${episode}`;
+                        console.log("PLAYING HASH " + hash)
+                        // PLAYING VIDEO
+                        playEpisodeVideo(season, episode);
+                    }
+                });
+
             }
         });
 
-        if (season) {
-            const hash = `/temporada-${season}`;
-            console.log("SEASON HASH " + hash)
-            // LOADING EPISODES LIST
-            loadData('episodes', hash, CONTAINER_EPISODES_LIST_ID, 'EPISODIOS').then(function () {
-                if (episode) {
-                    const hash = `/temporada-${season}/episodio-${episode}`;
-                    console.log("PLAYING HASH " + hash)
-                    // PLAYING VIDEO
-                    playEpisodeVideo(season, episode);
-                }
-            });
-
-        }
     }
 
     window.addEventListener('popstate', handleURLChange);
