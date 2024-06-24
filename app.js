@@ -15,12 +15,27 @@ function hideCursor() {
     document.body.style.cursor = 'none';
 }
 
+function showErrorPopup(error) {
+    const errorPopup = document.getElementById('error-popup');
+    const errorDetails = document.getElementById('error-details');
+
+    errorDetails.innerText = error;
+    errorPopup.style.display = 'block';
+}
+
+// Captura de errores globales
+window.onerror = function (message, source, lineno, colno, error) {
+    const errorMessage = `Error: ${message}\nSource: ${source}\nLine: ${lineno}, Column: ${colno}\nStack Trace: ${error ? error.stack : 'N/A'}`;
+    showErrorPopup(errorMessage);
+    return false;  // Prevent the default browser error handler
+};
+
 const REWIND_FASTWARD_TIME_SECONDS = 15;
 const CONTAINER_SESSIONS_LIST_ID = '#sessions-list';
 const CONTAINER_EPISODES_LIST_ID = '#episodes-list';
 const BASE_URL = 'https://pokemon-project.com';
 const LATIN_URL = '/episodios/latino';
-const BASE_LATIN_URL_LIST = BASE_URL + '/episodios/latino';
+const BASE_LATIN_URL_LIST = BASE_URL + LATIN_URL;
 const SERIE_URL = '/serie-ash';
 const BASE_LATIN_URL_VIDEO = BASE_URL + '/descargas/epis';
 
@@ -34,10 +49,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const nextEpisodeBtn = document.getElementById('next-episode');
 
     async function fetchHTML(url) {
-        const response = await fetch(url);
-        const text = await response.text();
-        const parser = new DOMParser();
-        return parser.parseFromString(text, 'text/html');
+        try {
+            showLoading();
+            const response = await fetch(url);
+            if (!response.ok) {
+                hideLoading();
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const text = await response.text();
+            const parser = new DOMParser();
+            hideLoading();
+            return parser.parseFromString(text, 'text/html');
+        } catch (error) {
+            hideLoading();
+            showErrorPopup(`Failed to fetch: ${url}\nError: ${error.message}`);
+            throw new Error(`Fetch error! status: ${response.message}`);
+        }
     }
 
     function setTitleName(name) {
@@ -220,21 +247,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         videoFunctions(videoElement)
 
-        const simulateClick = () => {
-            videoElement.play();
-            document.removeEventListener('click', simulateClick);
-        };
-        document.addEventListener('click', simulateClick);
-
-        document.dispatchEvent(new MouseEvent('click'));
-
-        videoElement.addEventListener('canplaythrough', function () {
-            document.dispatchEvent(new KeyboardEvent('Enter'));
-
-            videoElement.play();
-        });
-
         hideCursor()
+
+        console.log("SET TITLE  " + titleName)
+        content.querySelector(`#title`).innerText = titleName;
     }
 
     function videoFunctions(videoElement) {
@@ -329,14 +345,24 @@ document.addEventListener('DOMContentLoaded', function () {
             window.location.href = '?season=' + urlParams.get('season');
         }
 
-        function playPauseVideo() {
-            if (videoElement.paused) {
+        function playPauseVideo(allowPause = true) {
+            if (videoElement.paused || !allowPause) {
                 videoElement.play();
                 playPauseButton.innerText = 'Pause';
             } else {
                 videoElement.pause();
                 playPauseButton.innerText = 'Play';
             }
+            restartFadeOutAnimation()
+        }
+
+        function rewindVideo() {
+            videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS;
+            restartFadeOutAnimation()
+        }
+
+        function forwardVideo() {
+            videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS;
             restartFadeOutAnimation()
         }
 
@@ -349,13 +375,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         rewindButton.addEventListener('click', () => {
-            videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS;
-            restartFadeOutAnimation()
+            rewindVideo()
         });
 
         fastForwardButton.addEventListener('click', () => {
-            videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS;
-            restartFadeOutAnimation()
+            forwardVideo()
         });
 
         exitFullscreenButton.addEventListener('click', () => {
@@ -369,12 +393,12 @@ document.addEventListener('DOMContentLoaded', function () {
             restartFadeOutAnimation();
 
             const keyActions = {
-                'ArrowLeft': () => videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS,
-                'ArrowRight': () => videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS,
-                ' ': () => {
-                    event.preventDefault();
-                    playPauseVideo()
-                },
+                'ArrowLeft': () => rewindVideo,
+                'ArrowRight': () => forwardVideo,
+                // ' ': () => {
+                //     event.preventDefault();
+                //     playPauseVideo()
+                // },
                 'Escape': exitPlayer,
                 'Backspace': exitPlayer,
                 'Enter': playPauseVideo
@@ -385,12 +409,27 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        videoElement.addEventListener('click', () => {
-            playPauseVideo()
-        });
+        // videoElement.addEventListener('click', () => {
+        //     playPauseVideo()
+        // });
 
         document.addEventListener('mousemove', () => {
             restartFadeOutAnimation()
+        });
+
+        const simulateClick = (e) => {
+            if (e.target.id === 'video-container' || e.target.id === 'pokemon-video') {
+                playPauseVideo()
+            }
+        };
+        document.addEventListener('click', simulateClick);
+
+        document.dispatchEvent(new MouseEvent('click'));
+
+        videoElement.addEventListener('canplaythrough', function () {
+            document.dispatchEvent(new KeyboardEvent('Enter'));
+
+            playPauseVideo(false)
         });
 
     }
@@ -407,8 +446,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const currentElement = document.getElementById(`t${season}-e${episode}`)
             setTitleName(currentElement.innerText.trim());
-            console.log("SET TITLE  " + titleName)
-            content.querySelector(`#title`).innerText = titleName;
 
             setupVideoPlayer(videoUrl);
         } else {

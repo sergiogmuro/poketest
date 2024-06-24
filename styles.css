@@ -270,3 +270,30 @@ body.video #controls {
     left: 0px;
     margin: 6px;
 }
+
+/* Styles for the error popup */
+#error-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: orange;
+    border: 1px solid #ccc;
+    padding: 20px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+#error-popup h2 {
+    margin-top: 0;
+}
+#error-popup pre {
+    background-color: red;
+    padding: 10px;
+    overflow: auto;
+    max-height: 300px;
+}
+#error-popup button {
+    margin-top: 10px;
+    padding: 5px 10px;
+}
