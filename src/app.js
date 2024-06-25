@@ -1,3 +1,5 @@
+import 'regenerator-runtime/runtime';
+
 function showLoading() {
     document.getElementById('loading').style.display = 'flex';
 }
