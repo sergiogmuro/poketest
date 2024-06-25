@@ -1,5 +1,18 @@
 import 'regenerator-runtime/runtime';
 
+function isModernBrowser() {
+    return (
+        'fetch' in window &&
+        'Promise' in window &&
+        'URLSearchParams' in window
+    );
+}
+
+function showIncompatibilityMessage() {
+    var messageDiv = document.getElementById('incompatible-browser');
+    messageDiv.style.display = 'flex';
+}
+
 function showLoading() {
     document.getElementById('loading').style.display = 'flex';
 }
@@ -47,6 +60,10 @@ let isInVideo = false;
 let nextLink = null;
 
 document.addEventListener('DOMContentLoaded', function () {
+    if (!isModernBrowser()) {
+        showIncompatibilityMessage();
+    }
+
     const content = document.getElementById('content');
     const nextEpisodeBtn = document.getElementById('next-episode');
 

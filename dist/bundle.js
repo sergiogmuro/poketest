@@ -775,6 +775,13 @@ function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" !=
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function isModernBrowser() {
+  return 'fetch' in window && 'Promise' in window && 'URLSearchParams' in window;
+}
+function showIncompatibilityMessage() {
+  var messageDiv = document.getElementById('incompatible-browser');
+  messageDiv.style.display = 'flex';
+}
 function showLoading() {
   document.getElementById('loading').style.display = 'flex';
 }
@@ -815,6 +822,9 @@ var videoUrl = null;
 var isInVideo = false;
 var nextLink = null;
 document.addEventListener('DOMContentLoaded', function () {
+  if (!isModernBrowser()) {
+    showIncompatibilityMessage();
+  }
   var content = document.getElementById('content');
   var nextEpisodeBtn = document.getElementById('next-episode');
   function fetchHTML(_x) {

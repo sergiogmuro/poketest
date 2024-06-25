@@ -2,11 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Series de Pokémon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Series Pokémon TV Latino</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div id="incompatible-browser">
+    Este sitio no es compatible con su navegador. Por favor, use un navegador moderno para acceder al contenido.
+</div>
 <div id="content">
     <div id="loading" style="display: none;">
         <p>Loading...</p>
@@ -16,7 +19,7 @@
             <div></div>
         </div>
     </div>
-    <h1 id="title">Temporadas</h1>
+    <h1 id="title">Cargando...</h1>
     <div id="video" class="hidden">
         <div id="video-container">
             <button id="next-episode" class="hidden">Siguiente episodio</button>
@@ -27,7 +30,6 @@
             <button id="rewind"><<</button>
             <button id="fast-forward">>></button>
             <button id="exit-fullscreen">Exit</button>
-<!--            <button id="fullscreen">Fullscreen</button>-->
             <div id="progress-container">
                 <span id="progress-time">--:--</span>
                 <progress id="progress-bar" value="0" max="100"></progress>

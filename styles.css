@@ -7,6 +7,36 @@ body {
     color: white;
 }
 
+@media screen and (min-width: 320px) and (max-width: 767px) and (orientation: portrait) {
+    html {
+        transform: rotate(-90deg);
+        transform-origin: left top;
+        width: 100vh;
+        height: 100vw;
+        overflow-x: hidden;
+        position: absolute;
+        top: 100%;
+        left: 0;
+    }
+}
+
+#incompatible-browser {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 18px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
 body.hide-cursor {
     cursor: none;
 }
