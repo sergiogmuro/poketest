@@ -822,38 +822,33 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function _fetchHTML() {
     _fetchHTML = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(url) {
-      var _response, text, parser;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
-            _context.prev = 0;
-            showLoading();
-            _context.next = 4;
-            return axios.get(url);
-          case 4:
-            _response = _context.sent;
-            if (!(_response.status !== 200)) {
-              _context.next = 8;
-              break;
-            }
-            hideLoading();
-            throw new Error("HTTP error! status: ".concat(_response.status));
-          case 8:
-            text = _response.data; // Usamos response.data en lugar de response.text()
-            parser = new DOMParser();
-            hideLoading();
-            return _context.abrupt("return", parser.parseFromString(text, 'text/html'));
-          case 14:
-            _context.prev = 14;
-            _context.t0 = _context["catch"](0);
-            hideLoading();
-            showErrorPopup("Failed to fetch: ".concat(url, "\nError: ").concat(_context.t0.message));
-            throw new Error("Fetch error! status: ".concat(response.message));
-          case 19:
+            return _context.abrupt("return", new Promise(function (resolve, reject) {
+              showLoading();
+              var xhr = new XMLHttpRequest();
+              xhr.open('GET', url, true);
+              xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                  hideLoading();
+                  if (xhr.status === 200) {
+                    var text = xhr.responseText;
+                    var parser = new DOMParser();
+                    resolve(parser.parseFromString(text, 'text/html'));
+                  } else {
+                    showErrorPopup("Failed to fetch: ".concat(url, "\nError: HTTP status ").concat(xhr.status));
+                    reject(new Error("HTTP error! status: ".concat(xhr.status)));
+                  }
+                }
+              };
+              xhr.send();
+            }));
+          case 1:
           case "end":
             return _context.stop();
         }
-      }, _callee, null, [[0, 14]]);
+      }, _callee);
     }));
     return _fetchHTML.apply(this, arguments);
   }

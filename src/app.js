@@ -51,22 +51,27 @@ document.addEventListener('DOMContentLoaded', function () {
     const nextEpisodeBtn = document.getElementById('next-episode');
 
     async function fetchHTML(url) {
-        try {
+        return new Promise((resolve, reject) => {
             showLoading();
-            const response = await axios.get(url); // Utilizamos axios.get en lugar de fetch
-            if (response.status !== 200) {
-                hideLoading();
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const text = response.data; // Usamos response.data en lugar de response.text()
-            const parser = new DOMParser();
-            hideLoading();
-            return parser.parseFromString(text, 'text/html');
-        } catch (error) {
-            hideLoading();
-            showErrorPopup(`Failed to fetch: ${url}\nError: ${error.message}`);
-            throw new Error(`Fetch error! status: ${response.message}`);
-        }
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    hideLoading();
+                    if (xhr.status === 200) {
+                        const text = xhr.responseText;
+                        const parser = new DOMParser();
+                        resolve(parser.parseFromString(text, 'text/html'));
+                    } else {
+                        showErrorPopup(`Failed to fetch: ${url}\nError: HTTP status ${xhr.status}`);
+                        reject(new Error(`HTTP error! status: ${xhr.status}`));
+                    }
+                }
+            };
+
+            xhr.send();
+        });
     }
 
 
