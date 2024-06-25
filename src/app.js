@@ -53,12 +53,12 @@ document.addEventListener('DOMContentLoaded', function () {
     async function fetchHTML(url) {
         try {
             showLoading();
-            const response = await fetch(url);
-            if (!response.ok) {
+            const response = await axios.get(url); // Utilizamos axios.get en lugar de fetch
+            if (response.status !== 200) {
                 hideLoading();
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const text = await response.text();
+            const text = response.data; // Usamos response.data en lugar de response.text()
             const parser = new DOMParser();
             hideLoading();
             return parser.parseFromString(text, 'text/html');
@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
             throw new Error(`Fetch error! status: ${response.message}`);
         }
     }
+
 
     function setTitleName(name) {
         titleName = name;

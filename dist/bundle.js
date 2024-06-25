@@ -829,34 +829,31 @@ document.addEventListener('DOMContentLoaded', function () {
             _context.prev = 0;
             showLoading();
             _context.next = 4;
-            return fetch(url);
+            return axios.get(url);
           case 4:
             _response = _context.sent;
-            if (_response.ok) {
+            if (!(_response.status !== 200)) {
               _context.next = 8;
               break;
             }
             hideLoading();
             throw new Error("HTTP error! status: ".concat(_response.status));
           case 8:
-            _context.next = 10;
-            return _response.text();
-          case 10:
-            text = _context.sent;
+            text = _response.data; // Usamos response.data en lugar de response.text()
             parser = new DOMParser();
             hideLoading();
             return _context.abrupt("return", parser.parseFromString(text, 'text/html'));
-          case 16:
-            _context.prev = 16;
+          case 14:
+            _context.prev = 14;
             _context.t0 = _context["catch"](0);
             hideLoading();
             showErrorPopup("Failed to fetch: ".concat(url, "\nError: ").concat(_context.t0.message));
             throw new Error("Fetch error! status: ".concat(response.message));
-          case 21:
+          case 19:
           case "end":
             return _context.stop();
         }
-      }, _callee, null, [[0, 16]]);
+      }, _callee, null, [[0, 14]]);
     }));
     return _fetchHTML.apply(this, arguments);
   }
