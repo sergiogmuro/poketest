@@ -49,6 +49,8 @@ const REWIND_FASTWARD_TIME_SECONDS = 15;
 const CONTAINER_SESSIONS_LIST_ID = '#sessions-list';
 const CONTAINER_EPISODES_LIST_ID = '#episodes-list';
 const BASE_URL = 'https://pokemon-project.com';
+const MOVIES_URL = '/peliculas/';
+const BASE_MOVIES_URL_LIST = BASE_URL + MOVIES_URL;
 const LATIN_URL = '/episodios/latino';
 const BASE_LATIN_URL_LIST = BASE_URL + LATIN_URL;
 const SERIE_URL = '/serie-ash';
@@ -115,21 +117,22 @@ document.addEventListener('DOMContentLoaded', function () {
         return false;
     }
 
-    async function loadData(cacheKey, url, containerClass, title) {
+    async function loadData(cacheKey, url, containerClass, title, isMovie = false) {
         showLoading();
 
         content.querySelector('#lists').style.display = 'flex';
+        content.querySelector('#menu').style.display = 'inline-flex';
         const containerDiv = content.querySelector(`${containerClass}`);
 
         if (isCacheValid(cacheKey)) {
+            console.log('CACHE DATA KEY ' + cacheKey)
             const cachedData = JSON.parse(localStorage.getItem(`cached_${cacheKey}_${url}`));
             if (cachedData) {
-                displayData(cachedData, containerDiv, title);
+                displayData(cachedData, containerDiv, title, isMovie);
                 return;
             }
         }
 
-        url = BASE_LATIN_URL_LIST + SERIE_URL + url
         console.log('URL TO LOAD DATA ' + url)
 
         const doc = await fetchHTML(url);
@@ -150,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem(`${cacheKey}_cacheUpdateTime`, getCurrentTime());
         localStorage.setItem(`cached_${cacheKey}_${url}`, JSON.stringify(dataMap));
 
-        displayData(dataMap, containerDiv, title);
+        displayData(dataMap, containerDiv, title, isMovie);
     }
 
     function getVideoCacheKey(videoUrl) {
@@ -158,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return `pokemon-video-time-${videoUrl}`;
     }
 
-    function displayData(dataMap, containerDiv, title) {
+    function displayData(dataMap, containerDiv, title, isMovie) {
         hideLoading();
 
         content.querySelector(`#title`).innerText = title;
@@ -171,15 +174,20 @@ document.addEventListener('DOMContentLoaded', function () {
             let progress = null;
             let total = null;
 
-            const seasonAndEpisode = extractSeasonAndEpisode(itemLink);
-            const season = seasonAndEpisode.season;
-            const episode = seasonAndEpisode.episode;
+            const a = document.createElement('a');
+            const itemNamesTrimmed = itemNames.map(name => name.trim());
 
-            if (`#${containerDiv.id}` === CONTAINER_EPISODES_LIST_ID) {
-                let videoUrl = null;
-                if (season && episode) {
-                    videoUrl = buildVideoUrl(season, episode);
-                }
+            let itemName = itemNamesTrimmed.join(' ');
+            itemName = `${index}. ${itemName}`;
+            let newId;
+            let newUrl;
+
+            if (isMovie) {
+                console.log(itemLink);
+                const link = extractMovie(itemLink)
+
+                videoUrl = buildMovieVideoUrl(index)
+                console.log('URL '+videoUrl)
                 const videoKey = getVideoCacheKey(videoUrl);
 
                 const savedTime = localStorage.getItem(videoKey);
@@ -188,19 +196,35 @@ document.addEventListener('DOMContentLoaded', function () {
                     progress = savedProgress.c;
                     total = savedProgress.t;
                 }
-            }
 
-            const a = document.createElement('a');
-            const itemNamesTrimmed = itemNames.map(name => name.trim());
+                newId = `t${link}`
+                newUrl = '?movies=movies&movie-name=' + link + '&movie-id=' + index
+            } else {
+                const seasonAndEpisode = extractSeasonAndEpisode(itemLink);
+                const season = seasonAndEpisode.season;
+                const episode = seasonAndEpisode.episode;
 
-            let itemName = itemNamesTrimmed.join(' ');
-            itemName = `${index}. ${itemName}`;
+                if (`#${containerDiv.id}` === CONTAINER_EPISODES_LIST_ID) {
+                    let videoUrl = null;
+                    if (season && episode) {
+                        videoUrl = buildVideoUrl(season, episode);
+                    }
+                    const videoKey = getVideoCacheKey(videoUrl);
 
-            let newId = `t${season}`;
-            let newUrl = '?season=' + season
-            if (episode) {
-                newUrl += '&episode=' + episode
-                newId += `-e${episode}`
+                    const savedTime = localStorage.getItem(videoKey);
+                    if (savedTime) {
+                        const savedProgress = JSON.parse(savedTime);
+                        progress = savedProgress.c;
+                        total = savedProgress.t;
+                    }
+                }
+
+                newId = `t${season}`;
+                newUrl = '?season=' + season
+                if (episode) {
+                    newUrl += '&episode=' + episode
+                    newId += `-e${episode}`
+                }
             }
 
             a.innerText = itemName;
@@ -240,11 +264,19 @@ document.addEventListener('DOMContentLoaded', function () {
         return null;
     }
 
+    function extractMovie(url) {
+        return url.replace(BASE_MOVIES_URL_LIST, '');
+    }
+
     function extractSeasonAndEpisode(url) {
         return {
             season: extractSeason(url),
             episode: extractEpisode(url)
         };
+    }
+
+    function buildMovieVideoUrl(num) {
+        return `https://s3.pokemon-project.com/descargas/epis/peliculas/1/P${num}_ESP.mp4`;
     }
 
     function buildVideoUrl(season, episode) {
@@ -256,6 +288,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setVideoUrl(url)
 
         content.querySelector('#lists').style.display = 'none';
+        content.querySelector('#menu').style.display = 'none';
         const videoContainer = content.querySelector('#video-container');
         const videoElement = videoContainer.querySelector('#pokemon-video');
 
@@ -367,7 +400,11 @@ document.addEventListener('DOMContentLoaded', function () {
             // document.body.classList.remove('video');
             // // window.history.back();
             const urlParams = new URLSearchParams(window.location.search);
-            window.location.href = '?season=' + urlParams.get('season');
+            if (urlParams.get('movies')) {
+                window.location.href = '?movies=movies';
+            } else {
+                window.location.href = '?season=' + urlParams.get('season');
+            }
         }
 
         function playPauseVideo(allowPause = true) {
@@ -456,6 +493,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     }
 
+    function playVideo(videoUrl) {
+        console.log(`Reproduciendo video desde: ${videoUrl}`);
+
+        setupVideoPlayer(videoUrl);
+    }
+
     function playEpisodeVideo(season, episode) {
         content.querySelector(`#title`).innerText = titleName;
 
@@ -464,12 +507,25 @@ document.addEventListener('DOMContentLoaded', function () {
             nextLink = getNextEpisodeLink(season, episode);
             console.log("next episode", nextLink);
             const videoUrl = buildVideoUrl(season, episode);
-            console.log(`Reproduciendo video desde: ${videoUrl}`);
 
             const currentElement = document.getElementById(`t${season}-e${episode}`)
             setTitleName(currentElement.innerText.trim());
 
-            setupVideoPlayer(videoUrl);
+            playVideo(videoUrl)
+        } else {
+            console.error('No se pudo extraer la temporada y episodio de la URL.');
+        }
+    }
+
+    function playMovieVideo(movieName, id) {
+        content.querySelector(`#title`).innerText = titleName;
+
+        console.log('PLAYING EPISODE');
+        if (movieName && id) {
+            const currentElement = document.getElementById(`t${movieName}`)
+            setTitleName(currentElement.innerText.trim());
+            videoUrl = buildMovieVideoUrl(id);
+            playVideo(videoUrl)
         } else {
             console.error('No se pudo extraer la temporada y episodio de la URL.');
         }
@@ -516,11 +572,23 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.classList.remove('video');
 
         const urlParams = new URLSearchParams(window.location.search);
+        console.log(urlParams);
+        // MOVIES
+        if (urlParams.get('movies')) {
+            loadData('movies', BASE_MOVIES_URL_LIST, CONTAINER_SESSIONS_LIST_ID, 'PELICULAS', true).then(function () {
+                if (urlParams.get('movie-name') && urlParams.get('movie-id')) {
+                    playMovieVideo(urlParams.get('movie-name'), urlParams.get('movie-id'));
+                }
+            });
+
+            return false;
+        }
+
         const season = urlParams.get('season');
         const episode = urlParams.get('episode');
 
         // LOADING SERIES LIST
-        loadData('series', ``, CONTAINER_SESSIONS_LIST_ID, 'TEMPORADAS').then(function () {
+        loadData('series', BASE_LATIN_URL_LIST + SERIE_URL, CONTAINER_SESSIONS_LIST_ID, 'TEMPORADAS').then(function () {
             if (season) {
                 console.log(document.querySelector(`#t${season}`))
                 document.querySelector(`#t${season}`).classList.add('selected')
@@ -528,7 +596,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const hash = `/temporada-${season}`;
                 console.log("SEASON HASH " + hash)
                 // LOADING EPISODES LIST
-                loadData('episodes', hash, CONTAINER_EPISODES_LIST_ID, 'EPISODIOS').then(function () {
+                loadData('episodes', BASE_LATIN_URL_LIST + SERIE_URL + hash, CONTAINER_EPISODES_LIST_ID, 'EPISODIOS').then(function () {
                     if (episode) {
                         const hash = `/temporada-${season}/episodio-${episode}`;
                         console.log("PLAYING HASH " + hash)

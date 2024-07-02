@@ -813,6 +813,8 @@ var REWIND_FASTWARD_TIME_SECONDS = 15;
 var CONTAINER_SESSIONS_LIST_ID = '#sessions-list';
 var CONTAINER_EPISODES_LIST_ID = '#episodes-list';
 var BASE_URL = 'https://pokemon-project.com';
+var MOVIES_URL = '/peliculas/';
+var BASE_MOVIES_URL_LIST = BASE_URL + MOVIES_URL;
 var LATIN_URL = '/episodios/latino';
 var BASE_LATIN_URL_LIST = BASE_URL + LATIN_URL;
 var SERIE_URL = '/serie-ash';
@@ -886,30 +888,38 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function _loadData() {
     _loadData = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(cacheKey, url, containerClass, title) {
-      var containerDiv, cachedData, doc, elements, dataMap;
+      var isMovie,
+        containerDiv,
+        cachedData,
+        doc,
+        elements,
+        dataMap,
+        _args2 = arguments;
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
+            isMovie = _args2.length > 4 && _args2[4] !== undefined ? _args2[4] : false;
             showLoading();
             content.querySelector('#lists').style.display = 'flex';
+            content.querySelector('#menu').style.display = 'inline-flex';
             containerDiv = content.querySelector("".concat(containerClass));
             if (!isCacheValid(cacheKey)) {
-              _context2.next = 8;
+              _context2.next = 11;
               break;
             }
+            console.log('CACHE DATA KEY ' + cacheKey);
             cachedData = JSON.parse(localStorage.getItem("cached_".concat(cacheKey, "_").concat(url)));
             if (!cachedData) {
-              _context2.next = 8;
+              _context2.next = 11;
               break;
             }
-            displayData(cachedData, containerDiv, title);
+            displayData(cachedData, containerDiv, title, isMovie);
             return _context2.abrupt("return");
-          case 8:
-            url = BASE_LATIN_URL_LIST + SERIE_URL + url;
+          case 11:
             console.log('URL TO LOAD DATA ' + url);
-            _context2.next = 12;
+            _context2.next = 14;
             return fetchHTML(url);
-          case 12:
+          case 14:
             doc = _context2.sent;
             elements = doc.querySelectorAll('.real-table tbody tr a');
             dataMap = {};
@@ -924,8 +934,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             localStorage.setItem("".concat(cacheKey, "_cacheUpdateTime"), getCurrentTime());
             localStorage.setItem("cached_".concat(cacheKey, "_").concat(url), JSON.stringify(dataMap));
-            displayData(dataMap, containerDiv, title);
-          case 19:
+            displayData(dataMap, containerDiv, title, isMovie);
+          case 21:
           case "end":
             return _context2.stop();
         }
@@ -937,7 +947,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // console.log(videoUrl)
     return "pokemon-video-time-".concat(videoUrl);
   }
-  function displayData(dataMap, containerDiv, title) {
+  function displayData(dataMap, containerDiv, title, isMovie) {
     hideLoading();
     content.querySelector("#title").innerText = title;
     containerDiv.innerHTML = '';
@@ -949,33 +959,51 @@ document.addEventListener('DOMContentLoaded', function () {
       index = index + 1;
       var progress = null;
       var total = null;
-      var seasonAndEpisode = extractSeasonAndEpisode(itemLink);
-      var season = seasonAndEpisode.season;
-      var episode = seasonAndEpisode.episode;
-      if ("#".concat(containerDiv.id) === CONTAINER_EPISODES_LIST_ID) {
-        var _videoUrl = null;
-        if (season && episode) {
-          _videoUrl = buildVideoUrl(season, episode);
-        }
-        var videoKey = getVideoCacheKey(_videoUrl);
-        var savedTime = localStorage.getItem(videoKey);
-        if (savedTime) {
-          var savedProgress = JSON.parse(savedTime);
-          progress = savedProgress.c;
-          total = savedProgress.t;
-        }
-      }
       var a = document.createElement('a');
       var itemNamesTrimmed = itemNames.map(function (name) {
         return name.trim();
       });
       var itemName = itemNamesTrimmed.join(' ');
       itemName = "".concat(index, ". ").concat(itemName);
-      var newId = "t".concat(season);
-      var newUrl = '?season=' + season;
-      if (episode) {
-        newUrl += '&episode=' + episode;
-        newId += "-e".concat(episode);
+      var newId = void 0;
+      var newUrl = void 0;
+      if (isMovie) {
+        console.log(itemLink);
+        var link = extractMovie(itemLink);
+        videoUrl = buildMovieVideoUrl(index);
+        console.log('URL ' + videoUrl);
+        var videoKey = getVideoCacheKey(videoUrl);
+        var savedTime = localStorage.getItem(videoKey);
+        if (savedTime) {
+          var savedProgress = JSON.parse(savedTime);
+          progress = savedProgress.c;
+          total = savedProgress.t;
+        }
+        newId = "t".concat(link);
+        newUrl = '?movies=movies&movie-name=' + link + '&movie-id=' + index;
+      } else {
+        var seasonAndEpisode = extractSeasonAndEpisode(itemLink);
+        var season = seasonAndEpisode.season;
+        var episode = seasonAndEpisode.episode;
+        if ("#".concat(containerDiv.id) === CONTAINER_EPISODES_LIST_ID) {
+          var _videoUrl = null;
+          if (season && episode) {
+            _videoUrl = buildVideoUrl(season, episode);
+          }
+          var _videoKey = getVideoCacheKey(_videoUrl);
+          var _savedTime = localStorage.getItem(_videoKey);
+          if (_savedTime) {
+            var _savedProgress = JSON.parse(_savedTime);
+            progress = _savedProgress.c;
+            total = _savedProgress.t;
+          }
+        }
+        newId = "t".concat(season);
+        newUrl = '?season=' + season;
+        if (episode) {
+          newUrl += '&episode=' + episode;
+          newId += "-e".concat(episode);
+        }
       }
       a.innerText = itemName;
       a.id = newId;
@@ -1007,11 +1035,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     return null;
   }
+  function extractMovie(url) {
+    return url.replace(BASE_MOVIES_URL_LIST, '');
+  }
   function extractSeasonAndEpisode(url) {
     return {
       season: extractSeason(url),
       episode: extractEpisode(url)
     };
+  }
+  function buildMovieVideoUrl(num) {
+    return "https://s3.pokemon-project.com/descargas/epis/peliculas/1/P".concat(num, "_ESP.mp4");
   }
   function buildVideoUrl(season, episode) {
     return "".concat(BASE_LATIN_URL_VIDEO).concat(SERIE_URL, "/t").concat(season.toString().padStart(2, '0'), "/t").concat(season.toString().padStart(2, '0'), "_e").concat(episode.toString().padStart(2, '0'), ".es-la.mp4");
@@ -1020,6 +1054,7 @@ document.addEventListener('DOMContentLoaded', function () {
     isInVideo = true;
     setVideoUrl(url);
     content.querySelector('#lists').style.display = 'none';
+    content.querySelector('#menu').style.display = 'none';
     var videoContainer = content.querySelector('#video-container');
     var videoElement = videoContainer.querySelector('#pokemon-video');
     videoElement.style.height = '100vh';
@@ -1109,7 +1144,11 @@ document.addEventListener('DOMContentLoaded', function () {
       // document.body.classList.remove('video');
       // // window.history.back();
       var urlParams = new URLSearchParams(window.location.search);
-      window.location.href = '?season=' + urlParams.get('season');
+      if (urlParams.get('movies')) {
+        window.location.href = '?movies=movies';
+      } else {
+        window.location.href = '?season=' + urlParams.get('season');
+      }
     }
     function playPauseVideo() {
       var allowPause = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
@@ -1181,6 +1220,10 @@ document.addEventListener('DOMContentLoaded', function () {
       playPauseVideo(false);
     });
   }
+  function playVideo(videoUrl) {
+    console.log("Reproduciendo video desde: ".concat(videoUrl));
+    setupVideoPlayer(videoUrl);
+  }
   function playEpisodeVideo(season, episode) {
     content.querySelector("#title").innerText = titleName;
     console.log('PLAYING EPISODE');
@@ -1188,10 +1231,21 @@ document.addEventListener('DOMContentLoaded', function () {
       nextLink = getNextEpisodeLink(season, episode);
       console.log("next episode", nextLink);
       var _videoUrl2 = buildVideoUrl(season, episode);
-      console.log("Reproduciendo video desde: ".concat(_videoUrl2));
       var currentElement = document.getElementById("t".concat(season, "-e").concat(episode));
       setTitleName(currentElement.innerText.trim());
-      setupVideoPlayer(_videoUrl2);
+      playVideo(_videoUrl2);
+    } else {
+      console.error('No se pudo extraer la temporada y episodio de la URL.');
+    }
+  }
+  function playMovieVideo(movieName, id) {
+    content.querySelector("#title").innerText = titleName;
+    console.log('PLAYING EPISODE');
+    if (movieName && id) {
+      var currentElement = document.getElementById("t".concat(movieName));
+      setTitleName(currentElement.innerText.trim());
+      videoUrl = buildMovieVideoUrl(id);
+      playVideo(videoUrl);
     } else {
       console.error('No se pudo extraer la temporada y episodio de la URL.');
     }
@@ -1227,18 +1281,28 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('next-episode').classList.add('hidden');
     document.body.classList.remove('video');
     var urlParams = new URLSearchParams(window.location.search);
+    console.log(urlParams);
+    // MOVIES
+    if (urlParams.get('movies')) {
+      loadData('movies', BASE_MOVIES_URL_LIST, CONTAINER_SESSIONS_LIST_ID, 'PELICULAS', true).then(function () {
+        if (urlParams.get('movie-name') && urlParams.get('movie-id')) {
+          playMovieVideo(urlParams.get('movie-name'), urlParams.get('movie-id'));
+        }
+      });
+      return false;
+    }
     var season = urlParams.get('season');
     var episode = urlParams.get('episode');
 
     // LOADING SERIES LIST
-    loadData('series', "", CONTAINER_SESSIONS_LIST_ID, 'TEMPORADAS').then(function () {
+    loadData('series', BASE_LATIN_URL_LIST + SERIE_URL, CONTAINER_SESSIONS_LIST_ID, 'TEMPORADAS').then(function () {
       if (season) {
         console.log(document.querySelector("#t".concat(season)));
         document.querySelector("#t".concat(season)).classList.add('selected');
         var hash = "/temporada-".concat(season);
         console.log("SEASON HASH " + hash);
         // LOADING EPISODES LIST
-        loadData('episodes', hash, CONTAINER_EPISODES_LIST_ID, 'EPISODIOS').then(function () {
+        loadData('episodes', BASE_LATIN_URL_LIST + SERIE_URL + hash, CONTAINER_EPISODES_LIST_ID, 'EPISODIOS').then(function () {
           if (episode) {
             var _hash = "/temporada-".concat(season, "/episodio-").concat(episode);
             console.log("PLAYING HASH " + _hash);
