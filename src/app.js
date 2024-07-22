@@ -45,7 +45,8 @@ window.onerror = function (message, source, lineno, colno, error) {
     return false;  // Prevent the default browser error handler
 };
 
-const REWIND_FASTWARD_TIME_SECONDS = 15;
+const REWIND_FORWARD_TIME_SECONDS = 15;
+const SECONDS_REMAINING_NEXT_EPISODE = 30;
 const CONTAINER_SESSIONS_LIST_ID = '#sessions-list';
 const CONTAINER_EPISODES_LIST_ID = '#episodes-list';
 const BASE_URL = 'https://pokemon-project.com';
@@ -361,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // Mostrar el botón "Siguiente episodio" cuando falten 20 segundos
                     const timeRemaining = videoElement.duration - videoElement.currentTime;
-                    if (timeRemaining <= 60 && !document.getElementById('next-episode-btn')) {
+                    if (timeRemaining <= SECONDS_REMAINING_NEXT_EPISODE && !document.getElementById('next-episode-btn')) {
                         showNextEpisodeButton();
                     } else {
                         hideNextEpisodeButton();
@@ -419,12 +420,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function rewindVideo() {
-            videoElement.currentTime -= REWIND_FASTWARD_TIME_SECONDS;
+            videoElement.currentTime -= REWIND_FORWARD_TIME_SECONDS;
             restartFadeOutAnimation()
         }
 
         function forwardVideo() {
-            videoElement.currentTime += REWIND_FASTWARD_TIME_SECONDS;
+            videoElement.currentTime += REWIND_FORWARD_TIME_SECONDS;
             restartFadeOutAnimation()
         }
 
