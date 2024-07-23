@@ -1078,6 +1078,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var fastForwardButton = document.getElementById('fast-forward');
     var exitFullscreenButton = document.getElementById('exit-fullscreen');
     var progressBar = document.getElementById('progress-bar');
+    var progress = document.getElementById('progress');
+    var progressDot = document.getElementById('progress-bar-dot');
     var controls = document.getElementById('controls');
     var progressTime = document.getElementById('progress-time');
     var totalDuration = document.getElementById('duration-total');
@@ -1105,7 +1107,10 @@ document.addEventListener('DOMContentLoaded', function () {
         var currentTime = videoElement.currentTime;
         var duration = videoElement.duration;
         if (isFinite(currentTime) && isFinite(duration) && duration > 0) {
-          progressBar.value = currentTime / duration * 100;
+          var positionDuration = currentTime / duration * 100;
+          // progressBar.value = positionDuration;
+          progress.style.setProperty('--p', "".concat(positionDuration, "%"));
+          progressDot.style.setProperty('--p', "".concat(positionDuration, "%"));
           localStorage.setItem(videoKey, "{\"c\": \"".concat(videoElement.currentTime, "\", \"t\": \"").concat(videoElement.duration, "\"}"));
           updateVideoTime();
 
@@ -1119,6 +1124,7 @@ document.addEventListener('DOMContentLoaded', function () {
           if (timeRemaining < 1) {
             exitPlayer();
           }
+          return false;
         }
       });
     }
@@ -1189,9 +1195,10 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!isInVideo) return false;
       console.log('keydown');
       restartFadeOutAnimation();
+      var progressBarDot = document.getElementById('progress-bar-dot');
       var keyActions = {
-        'ArrowLeft': rewindVideo,
-        'ArrowRight': forwardVideo,
+        'ArrowLeft': document.activeElement === progressBarDot && rewindVideo,
+        'ArrowRight': document.activeElement === progressBarDot && forwardVideo,
         ' ': playPauseVideo,
         'Escape': exitPlayer,
         'Backspace': exitPlayer,

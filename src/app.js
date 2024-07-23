@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const link = extractMovie(itemLink)
 
                 videoUrl = buildMovieVideoUrl(index)
-                console.log('URL '+videoUrl)
+                console.log('URL ' + videoUrl)
                 const videoKey = getVideoCacheKey(videoUrl);
 
                 const savedTime = localStorage.getItem(videoKey);
@@ -319,6 +319,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const fastForwardButton = document.getElementById('fast-forward');
         const exitFullscreenButton = document.getElementById('exit-fullscreen');
         const progressBar = document.getElementById('progress-bar');
+        const progress = document.getElementById('progress');
+        const progressDot = document.getElementById('progress-bar-dot');
         const controls = document.getElementById('controls');
         const progressTime = document.getElementById('progress-time');
         const totalDuration = document.getElementById('duration-total');
@@ -355,7 +357,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const duration = videoElement.duration;
 
                 if (isFinite(currentTime) && isFinite(duration) && duration > 0) {
-                    progressBar.value = (currentTime / duration) * 100;
+                    let positionDuration = (currentTime / duration) * 100;
+                    // progressBar.value = positionDuration;
+                    progress.style.setProperty('--p', `${positionDuration}%`);
+                    progressDot.style.setProperty('--p', `${positionDuration}%`);
                     localStorage.setItem(videoKey, `{"c": "${videoElement.currentTime}", "t": "${videoElement.duration}"}`);
 
                     updateVideoTime()
@@ -371,6 +376,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (timeRemaining < 1) {
                         exitPlayer()
                     }
+
+                    return false;
                 }
 
             });
@@ -455,9 +462,11 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('keydown')
             restartFadeOutAnimation();
 
+            const progressBarDot = document.getElementById('progress-bar-dot');
+
             const keyActions = {
-                'ArrowLeft': rewindVideo,
-                'ArrowRight': forwardVideo,
+                'ArrowLeft': document.activeElement === progressBarDot && rewindVideo,
+                'ArrowRight': document.activeElement === progressBarDot && forwardVideo,
                 ' ': playPauseVideo,
                 'Escape': exitPlayer,
                 'Backspace': exitPlayer,

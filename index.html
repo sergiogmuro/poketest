@@ -30,14 +30,19 @@
             <video src="#" id="pokemon-video" nocontrols></video>
         </div>
         <div id="controls">
-            <button id="play-pause">Play</button>
-            <button id="rewind"><<</button>
-            <button id="fast-forward">>></button>
-            <button id="exit-fullscreen">Exit</button>
             <div id="progress-container">
                 <span id="progress-time">--:--</span>
-                <progress id="progress-bar" value="0" max="100"></progress>
+                <div id="progress-bar">
+                    <div id="progress" style="--p:0%"></div>
+                    <button id="progress-bar-dot">&nbsp;</button>
+                </div>
                 <span id="duration-total">--:--</span>
+            </div>
+            <div id="controls-container">
+                <button id="play-pause">Play</button>
+                <button id="rewind"><<</button>
+                <button id="fast-forward">>></button>
+                <button id="exit-fullscreen">Menu</button>
             </div>
         </div>
     </div>
