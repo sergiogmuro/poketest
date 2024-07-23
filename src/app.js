@@ -469,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const keyActions = {
                 'ArrowLeft': () => {
-                    (document.activeElement === progressBarDot)
+                    (document.activeElement === progressBarDot || document.activeElement.id === 'progress-bar-dot')
                     {
                         event.preventDefault();
 
@@ -477,7 +477,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 'ArrowRight': () => {
-                    (document.activeElement === progressBarDot)
+                    (document.activeElement === progressBarDot || document.activeElement.id === 'progress-bar-dot')
                     {
                         event.preventDefault();
 

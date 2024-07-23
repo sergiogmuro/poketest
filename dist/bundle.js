@@ -1200,14 +1200,14 @@ document.addEventListener('DOMContentLoaded', function () {
       consoleInfo.innerHTML = "EL: ".concat(document.activeElement, "<br/>ID: ").concat(document.activeElement.id, "<br/>EV: ").concat(event.key);
       var keyActions = {
         'ArrowLeft': function ArrowLeft() {
-          document.activeElement === progressBarDot;
+          document.activeElement === progressBarDot || document.activeElement.id === 'progress-bar-dot';
           {
             event.preventDefault();
             rewindVideo();
           }
         },
         'ArrowRight': function ArrowRight() {
-          document.activeElement === progressBarDot;
+          document.activeElement === progressBarDot || document.activeElement.id === 'progress-bar-dot';
           {
             event.preventDefault();
             forwardVideo();
