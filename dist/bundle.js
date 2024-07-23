@@ -1193,15 +1193,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     document.addEventListener('keydown', function (event) {
       if (!isInVideo) return false;
-      event.preventDefault();
       console.log('keydown');
       restartFadeOutAnimation();
       var progressBarDot = document.getElementById('progress-bar-dot');
       var consoleInfo = document.getElementById('console-info');
       consoleInfo.innerHTML = "EL: ".concat(document.activeElement, "<br/>ID: ").concat(document.activeElement.id, "<br/>EV: ").concat(event.key);
       var keyActions = {
-        'ArrowLeft': document.activeElement === progressBarDot && rewindVideo,
-        'ArrowRight': document.activeElement === progressBarDot && forwardVideo,
+        'ArrowLeft': function ArrowLeft() {
+          document.activeElement === progressBarDot;
+          {
+            event.preventDefault();
+            rewindVideo();
+          }
+        },
+        'ArrowRight': function ArrowRight() {
+          document.activeElement === progressBarDot;
+          {
+            event.preventDefault();
+            forwardVideo();
+          }
+        },
         ' ': playPauseVideo,
         'Escape': exitPlayer,
         'Backspace': exitPlayer,
