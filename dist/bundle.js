@@ -1196,6 +1196,8 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log('keydown');
       restartFadeOutAnimation();
       var progressBarDot = document.getElementById('progress-bar-dot');
+      var consoleInfo = document.getElementById('console-info');
+      consoleInfo.innerHTML = "EL: ".concat(document.activeElement, "<br/>ID: ").concat(document.activeElement.id, "<br/>EV: ").concat(event.key);
       var keyActions = {
         'ArrowLeft': document.activeElement === progressBarDot && rewindVideo,
         'ArrowRight': document.activeElement === progressBarDot && forwardVideo,

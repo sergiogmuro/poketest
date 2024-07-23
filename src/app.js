@@ -463,6 +463,8 @@ document.addEventListener('DOMContentLoaded', function () {
             restartFadeOutAnimation();
 
             const progressBarDot = document.getElementById('progress-bar-dot');
+            const consoleInfo = document.getElementById('console-info');
+            consoleInfo.innerHTML = `EL: ${document.activeElement}<br/>ID: ${document.activeElement.id}<br/>EV: ${event.key}`
 
             const keyActions = {
                 'ArrowLeft': document.activeElement === progressBarDot && rewindVideo,
