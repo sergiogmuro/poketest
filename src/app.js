@@ -458,6 +458,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.addEventListener('keydown', (event) => {
             if (!isInVideo) return false;
+            
+            event.preventDefault();
 
             console.log('keydown')
             restartFadeOutAnimation();

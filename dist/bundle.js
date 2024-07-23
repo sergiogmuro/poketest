@@ -1193,6 +1193,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     document.addEventListener('keydown', function (event) {
       if (!isInVideo) return false;
+      event.preventDefault();
       console.log('keydown');
       restartFadeOutAnimation();
       var progressBarDot = document.getElementById('progress-bar-dot');
