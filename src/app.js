@@ -458,8 +458,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.addEventListener('keydown', (event) => {
             if (!isInVideo) return false;
-            
-            event.preventDefault();
+
+
 
             console.log('keydown')
             restartFadeOutAnimation();
@@ -469,8 +469,8 @@ document.addEventListener('DOMContentLoaded', function () {
             consoleInfo.innerHTML = `EL: ${document.activeElement}<br/>ID: ${document.activeElement.id}<br/>EV: ${event.key}`
 
             const keyActions = {
-                'ArrowLeft': document.activeElement === progressBarDot && rewindVideo,
-                'ArrowRight': document.activeElement === progressBarDot && forwardVideo,
+                'ArrowLeft': document.activeElement === progressBarDot && event.preventDefault() && rewindVideo,
+                'ArrowRight': document.activeElement === progressBarDot && event.preventDefault() && forwardVideo,
                 ' ': playPauseVideo,
                 'Escape': exitPlayer,
                 'Backspace': exitPlayer,
